@@ -1,1432 +1,1086 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>Statecraft: มหาจักรวรรดิแห่งการปกครอง</title>
-  <meta name="description" content="เกมสร้างเมืองและบริหารประเทศแบบใช้เสียงและสัมผัส ออกแบบมาเพื่อโปรแกรมอ่านหน้าจอ (Screen Reader)">
-  <style>
-    :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --surface-elevated: #21262d;
-      --border: #30363d;
-      --border-bright: #6e7681;
-      
-      --text: #f0f6fc;
-      --text-muted: #8b949e;
-      --gold: #f59e0b;
-      --gold-bright: #fbbf24;
-      --cyan: #06b6d4;
-      --red: #f87171;
-      --green: #34d399;
-
-      --font: -apple-system, BlinkMacSystemFont, "Sarabun", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      --min-touch: 56px;
-      --radius: 12px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      font-size: 1.05rem;
-      padding-bottom: 110px;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .app-shell {
-      max-width: 780px;
-      margin: 0 auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    :focus-visible {
-      outline: 4px solid var(--cyan) !important;
-      outline-offset: 3px !important;
-    }
-
-    .btn {
-      min-height: var(--min-touch);
-      padding: 12px 18px;
-      font-family: inherit;
-      font-size: 1rem;
-      font-weight: 700;
-      border-radius: var(--radius);
-      border: 2px solid transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      transition: background 0.15s ease, border-color 0.15s ease;
-    }
-
-    .btn-gold {
-      background: var(--gold);
-      color: #000;
-      border-color: var(--gold-bright);
-    }
-    .btn-gold:active { background: var(--gold-bright); }
-
-    .btn-secondary {
-      background: var(--surface-elevated);
-      color: var(--text);
-      border-color: var(--border-bright);
-    }
-    .btn-secondary:active { background: #2d333b; }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border-color: var(--border);
-    }
-
-    .btn:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-      border-color: var(--border);
-      background: var(--surface);
-      color: var(--text-muted);
-    }
-
-    .btn-policy {
-      flex-direction: column;
-      align-items: flex-start;
-      text-align: left;
-      gap: 4px;
-      padding: 12px 16px;
-      width: 100%;
-    }
-
-    .policy-subtext {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      font-weight: normal;
-    }
-
-    header {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .game-title {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: var(--gold);
-    }
-
-    .sub-title {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-    }
-
-    .header-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .vitals-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-    }
-
-    .vital-tile {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .vital-name {
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }
-
-    .vital-value {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    .vital-sub {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .positive { color: var(--green); }
-    .negative { color: var(--red); }
-
-    .card {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--gold);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .dilemma-card {
-      border-color: var(--gold);
-    }
-
-    .dilemma-narrative {
-      font-size: 1.05rem;
-      color: var(--text);
-    }
-
-    .dilemma-options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .choice-btn {
-      flex-direction: column;
-      align-items: flex-start;
-      text-align: left;
-      gap: 4px;
-      padding: 14px;
-    }
-
-    .choice-title {
-      font-weight: 800;
-      color: var(--gold-bright);
-    }
-
-    .choice-desc {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      font-weight: normal;
-    }
-
-    .dilemma-resolved-box {
-      background: #0f2d1e;
-      border: 2px solid var(--green);
-      border-radius: var(--radius);
-      padding: 14px;
-      color: var(--text);
-    }
-
-    .sector-item {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      border-top: 1px solid var(--border);
-      padding-top: 16px;
-    }
-    .sector-item:first-of-type {
-      border-top: none;
-      padding-top: 0;
-    }
-
-    .sector-stats {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.95rem;
-      color: var(--text-muted);
-    }
-
-    .sticky-actions {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(13, 17, 23, 0.96);
-      backdrop-filter: blur(8px);
-      border-top: 2px solid var(--border);
-      padding: 12px 16px;
-      z-index: 100;
-    }
-
-    .sticky-container {
-      max-width: 780px;
-      margin: 0 auto;
-    }
-
-    .chronicle-box {
-      max-height: 180px;
-      overflow-y: auto;
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .chronicle-item {
-      background: var(--surface-elevated);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      border-left: 3px solid var(--gold);
-    }
-
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 200;
-    }
-    .modal-overlay[hidden] { display: none; }
-
-    .modal-dialog {
-      background: var(--surface);
-      border: 3px solid var(--gold);
-      border-radius: var(--radius);
-      padding: 24px;
-      max-width: 500px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      text-align: center;
-    }
-    .modal-dialog.victory { border-color: var(--green); }
-    .modal-dialog.defeat { border-color: var(--red); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมสร้างเมือง (City Builder Simple)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --border: #334155;
+            --text: #f8fafc;
+            --accent: #38bdf8;
+        }
+        body.contrast {
+            --bg: #000;
+            --panel: #000;
+            --border: #fff;
+            --text: #fff;
+            --accent: #ffff00;
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+        :focus-visible {
+            outline: 3px solid #f59e0b !important;
+            outline-offset: 2px !important;
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-full flex flex-col p-3 md:p-6 text-slate-100">
 
-  <!-- Screen Reader Live Regions -->
-  <div id="sr-alert" class="sr-only" aria-live="assertive" role="alert"></div>
-  <div id="sr-status" class="sr-only" aria-live="polite" role="status"></div>
+    <!-- Screen Reader Announcer -->
+    <div id="sr-announcer" class="sr-only" aria-live="polite"></div>
 
-  <div class="app-shell">
+    <div class="max-w-5xl w-full mx-auto flex flex-col gap-4">
 
-    <!-- Header -->
-    <header role="banner">
-      <div class="header-bar">
-        <div>
-          <h1 class="game-title" id="txt-game-title">Statecraft: มหาจักรวรรดิแห่งการปกครอง</h1>
-          <p class="sub-title" id="reign-year">ปีที่ 1 แห่งการครองราชย์ — สภาการปกครองสูงสุด</p>
+        <!-- Header -->
+        <header class="bg-slate-800 border border-slate-700 p-4 rounded-2xl flex flex-wrap justify-between items-center gap-3 shadow-lg">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-amber-400 flex items-center gap-2">
+                    🏙️ บริหารเมืองแบบเข้าใจง่าย
+                </h1>
+                <p class="text-xs text-slate-400">สร้างเมือง • ดูแลประชากร • เล่นง่ายสบายตา</p>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="openTransportModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow" title="ระบบขนส่งและยานพาหนะ">
+                    🚌 ขนส่ง (<span id="transport-badge">2</span>)
+                </button>
+                <button onclick="saveGame()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-bold transition flex items-center gap-1" title="บันทึกเกมลงเครื่อง">
+                    💾 บันทึก
+                </button>
+                <button onclick="loadGame()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-bold transition flex items-center gap-1" title="โหลดข้อมูลที่บันทึกไว้">
+                    📂 โหลด
+                </button>
+                <button id="sfx-btn" onclick="toggleSFX()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-bold transition">
+                    🔊 เสียง: เปิด
+                </button>
+                <button id="tts-btn" onclick="toggleTTS()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-bold transition">
+                    🗣️ บรรยาย: ปิด
+                </button>
+                <button id="contrast-btn" onclick="toggleContrast()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition">
+                    🌓 คอนทราสต์
+                </button>
+            </div>
+        </header>
+
+        <!-- Status Bar: 6 Core Resources -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" role="region" aria-label="สถานะทรัพยากร">
+            <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl flex items-center gap-3">
+                <span class="text-2xl">💰</span>
+                <div>
+                    <div class="text-[11px] text-slate-400">เงินคงคลัง</div>
+                    <div class="text-lg font-bold text-amber-400" id="val-gold">1,000</div>
+                </div>
+            </div>
+            <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl flex items-center gap-3">
+                <span class="text-2xl">👥</span>
+                <div>
+                    <div class="text-[11px] text-slate-400">ประชากร</div>
+                    <div class="text-lg font-bold text-cyan-400" id="val-pop">20</div>
+                </div>
+            </div>
+            <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl flex items-center gap-3">
+                <span class="text-2xl">🎓</span>
+                <div>
+                    <div class="text-[11px] text-slate-400">การศึกษา</div>
+                    <div class="text-lg font-bold text-indigo-400" id="val-edu">50%</div>
+                </div>
+            </div>
+            <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl flex items-center gap-3">
+                <span class="text-2xl">🌾</span>
+                <div>
+                    <div class="text-[11px] text-slate-400">อาหาร</div>
+                    <div class="text-lg font-bold text-emerald-400" id="val-food">50</div>
+                </div>
+            </div>
+            <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl flex items-center gap-3">
+                <span class="text-2xl">⚡</span>
+                <div>
+                    <div class="text-[11px] text-slate-400">ไฟฟ้า</div>
+                    <div class="text-lg font-bold text-yellow-400" id="val-power">100%</div>
+                </div>
+            </div>
+            <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl flex items-center gap-3">
+                <span class="text-2xl">😊</span>
+                <div>
+                    <div class="text-[11px] text-slate-400">ความสุข</div>
+                    <div class="text-lg font-bold text-pink-400" id="val-happy">80%</div>
+                </div>
+            </div>
         </div>
-        <div class="header-controls">
-          <button id="lang-btn" class="btn btn-outline" type="button" aria-label="เปลี่ยนภาษา สลับเป็นภาษาอังกฤษ">
-            🌐 ภาษา: ไทย
-          </button>
-          <button id="sound-btn" class="btn btn-outline" type="button" aria-pressed="true">
-            🔊 เสียง: เปิด
-          </button>
-          <button id="restart-btn" class="btn btn-outline" type="button">
-            ↺ เริ่มใหม่
-          </button>
+
+        <!-- Quick Event Notice (if any) -->
+        <div id="notice-box" class="hidden bg-slate-800 border-l-4 border-amber-400 p-3 rounded-r-xl text-sm flex items-center justify-between gap-3 shadow-md">
+            <div id="notice-text">ข้อความแจ้งเตือน</div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button id="notice-action-btn" class="hidden px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg transition shadow"></button>
+                <button onclick="dismissNotice()" class="text-xs text-slate-400 hover:text-white px-2 py-1">✕ ปิด</button>
+            </div>
         </div>
-      </div>
-    </header>
 
-    <!-- Main Content -->
-    <main id="main-content" role="main">
+        <!-- Main Workspace -->
+        <main class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- Grid (Map) -->
+            <section class="md:col-span-2 bg-slate-800/90 border border-slate-700 rounded-2xl p-4 flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <!-- Zone Tabs -->
+                    <div class="flex gap-2">
+                        <button id="tab-land" onclick="switchZone('land')" class="px-3.5 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                            🌱 พื้นดิน (25 ช่อง)
+                        </button>
+                        <button id="tab-sea" onclick="switchZone('sea')" class="px-3.5 py-1.5 bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                            🌊 ทะเล (25 ช่อง)
+                        </button>
+                    </div>
 
-      <!-- Vitals Section -->
-      <section id="vitals-section" aria-label="สรุปข้อมูลสถานะของประเทศ" style="margin-bottom: 20px;">
-        <div class="vitals-grid">
-          <div class="vital-tile" id="tile-gold">
-            <span class="vital-name" id="lbl-gold">คลังหลวง</span>
-            <span class="vital-value" id="val-gold">500</span>
-            <span class="vital-sub" id="sub-gold">+60 / ปี</span>
-          </div>
-          <div class="vital-tile" id="tile-pop">
-            <span class="vital-name" id="lbl-pop">ประชากร</span>
-            <span class="vital-value" id="val-pop">100</span>
-            <span class="vital-sub" id="sub-pop">สูงสุด: 250</span>
-          </div>
-          <div class="vital-tile" id="tile-food">
-            <span class="vital-name" id="lbl-food">เสบียงอาหาร</span>
-            <span class="vital-value" id="val-food">300</span>
-            <span class="vital-sub" id="sub-food">+40 / ปี</span>
-          </div>
-          <div class="vital-tile" id="tile-happy">
-            <span class="vital-name" id="lbl-happy">ความพึงพอใจ</span>
-            <span class="vital-value" id="val-happy">70%</span>
-            <span class="vital-sub" id="sub-happy">ยุครุ่งเรือง: 0/4</span>
-          </div>
-          <div class="vital-tile" id="tile-mat">
-            <span class="vital-name" id="lbl-mat">วัสดุก่อสร้าง</span>
-            <span class="vital-value" id="val-mat">100</span>
-            <span class="vital-sub" id="sub-mat">+50 / ปี</span>
-          </div>
-        </div>
-      </section>
+                    <div class="text-xs text-slate-400 font-bold" id="turn-text">
+                        รอบที่: 1
+                    </div>
+                </div>
 
-      <!-- Council Dilemma -->
-      <section aria-labelledby="heading-dilemma" style="margin-bottom: 20px;">
-        <div class="card dilemma-card" id="dilemma-wrapper">
-          <h2 id="heading-dilemma" class="card-title">
-            <span id="txt-dilemma-title">📜 ญัตติข้อหารือแห่งสภาประจำปี</span>
-          </h2>
-          
-          <div id="dilemma-active-box" style="display: flex; flex-direction: column; gap: 12px;">
-            <p class="dilemma-narrative" id="dilemma-narrative">กำลังเสนอญัตติเข้าสู่สภา...</p>
-            <div class="dilemma-options">
-              <button id="choice-a" class="btn btn-secondary choice-btn" type="button">
-                <span class="choice-title" id="choice-a-title">ทางเลือก ก</span>
-                <span class="choice-desc" id="choice-a-desc">กำลังคำนวณผลกระทบ...</span>
-              </button>
-              <button id="choice-b" class="btn btn-secondary choice-btn" type="button">
-                <span class="choice-title" id="choice-b-title">ทางเลือก ข</span>
-                <span class="choice-desc" id="choice-b-desc">กำลังคำนวณผลกระทบ...</span>
-              </button>
-            </div>
-          </div>
+                <!-- 5x5 Grid for clarity and instant readability -->
+                <div id="grid-container" class="grid grid-cols-5 gap-2 p-1.5 bg-slate-900/60 rounded-xl aspect-square max-w-[460px] mx-auto w-full">
+                    <!-- Grid cells injected here -->
+                </div>
 
-          <div id="dilemma-resolved-box" class="dilemma-resolved-box" style="display: none;">
-            <strong id="txt-ratified-label">✓ พระราชกฤษฎีกามีผลบังคับใช้แล้ว:</strong>
-            <p id="resolved-decree-text" style="margin-top: 4px;"></p>
-          </div>
-        </div>
-      </section>
+                <div class="flex justify-between items-center pt-1 border-t border-slate-700/60">
+                    <button onclick="readStatus()" class="text-xs text-amber-400 hover:underline font-medium" title="กดแป้น R เพื่ออ่านเสียง">
+                        📢 สรุปสถานะ (กด R)
+                    </button>
 
-      <!-- Sector Investments -->
-      <section aria-labelledby="heading-sectors" style="margin-bottom: 20px;">
-        <div class="card">
-          <h2 id="heading-sectors" class="card-title">
-            <span id="txt-sectors-heading">🛠️ สี่เขตการปกครองหลัก</span>
-          </h2>
+                    <button onclick="nextTurn()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg transition flex items-center gap-2">
+                        <span>ข้ามรอบ</span>
+                        <kbd class="px-1.5 py-0.5 bg-emerald-800 text-[10px] rounded text-emerald-200">Space</kbd>
+                    </button>
+                </div>
+            </section>
 
-          <!-- Agriculture -->
-          <article class="sector-item" aria-labelledby="title-agri">
-            <div style="display: flex; justify-content: space-between;">
-              <h3 id="title-agri" style="font-size: 1.1rem; color: var(--gold);">🌾 เขตเกษตรกรรมลุ่มน้ำ</h3>
-              <span id="badge-agri" style="color: var(--text-muted); font-size: 0.9rem;">ระดับ 1</span>
-            </div>
-            <div class="sector-stats">
-              <span id="agri-output">ผลผลิต: 145 อาหาร/ปี</span>
-              <span id="agri-role">ป้องกันภาวะอดอยาก</span>
-            </div>
-            <button id="btn-ration" class="btn btn-secondary btn-policy" type="button">
-              <span>นโยบายปันส่วน: <strong>ปกติ (1.0x)</strong></span>
-              <span class="policy-subtext" id="sub-ration">บริโภคอาหารอัตราปกติ ความพึงพอใจคงที่</span>
-            </button>
-            <button id="btn-upgrade-agri" class="btn btn-gold" type="button">
-              ยกระดับเขตเกษตรกรรม (140 เหรียญ, 35 วัตถุดิบ)
-            </button>
-          </article>
+            <!-- Building Selector -->
+            <aside class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 flex flex-col gap-3">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-200 flex items-center gap-1.5">
+                        🏗️ เลือกสิ่งก่อสร้าง
+                    </h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5">เลือกอาคารแล้วคลิกช่องบนแผนที่เพื่อสร้าง</p>
+                </div>
 
-          <!-- Commerce -->
-          <article class="sector-item" aria-labelledby="title-comm">
-            <div style="display: flex; justify-content: space-between;">
-              <h3 id="title-comm" style="font-size: 1.1rem; color: var(--gold);">🪙 ศูนย์กลางการพาณิชย์</h3>
-              <span id="badge-comm" style="color: var(--text-muted); font-size: 0.9rem;">ระดับ 1</span>
-            </div>
-            <div class="sector-stats">
-              <span id="comm-output">ตลาดการค้า: 70 เหรียญ/ปี</span>
-              <span id="comm-tax">ภาษี: +18 เหรียญ</span>
-            </div>
-            <button id="btn-tax" class="btn btn-secondary btn-policy" type="button">
-              <span>นโยบายภาษี: <strong>ปานกลาง (15%)</strong></span>
-              <span class="policy-subtext" id="sub-tax">รายได้ภาษีสมดุล ไม่กระทบต่อความพึงพอใจ</span>
-            </button>
-            <button id="btn-upgrade-comm" class="btn btn-gold" type="button">
-              ยกระดับศูนย์การค้า (160 เหรียญ, 45 วัตถุดิบ)
-            </button>
-          </article>
+                <div id="building-list" class="flex flex-col gap-2 overflow-y-auto max-h-[460px] pr-1">
+                    <!-- Cards injected by JS -->
+                </div>
 
-          <!-- Civic Sanctuary -->
-          <article class="sector-item" aria-labelledby="title-civic">
-            <div style="display: flex; justify-content: space-between;">
-              <h3 id="title-civic" style="font-size: 1.1rem; color: var(--gold);">🏛️ สานุศิษย์นครบาล</h3>
-              <span id="badge-civic" style="color: var(--text-muted); font-size: 0.9rem;">ระดับ 1</span>
-            </div>
-            <div class="sector-stats">
-              <span id="civic-output">รองรับที่อยู่อาศัย: 250 คน</span>
-              <span id="civic-role">สร้างความสุขและเสถียรภาพ</span>
-            </div>
-            <button id="btn-festival" class="btn btn-secondary btn-policy" type="button">
-              <span>งานเทศกาล: <strong>ธรรมดา (15 เหรียญ)</strong></span>
-              <span class="policy-subtext" id="sub-festival">จัดงานรื่นเริงประจำปี +2% ความพึงพอใจ</span>
-            </button>
-            <button id="btn-upgrade-civic" class="btn btn-gold" type="button">
-              ยกระดับนครบาล (180 เหรียญ, 55 วัตถุดิบ)
-            </button>
-          </article>
+                <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/60 text-[11px] text-slate-400">
+                    💡 <b class="text-slate-300">วิธีเล่น:</b> สร้างฟาร์มเพื่อเพิ่มอาหาร สร้างบ้านเพิ่มคน สร้างตลาดเพิ่มเงิน หากอาหารหรือไฟไม่พอ ความสุขจะลดลง!
+                </div>
+            </aside>
 
-          <!-- Industry -->
-          <article class="sector-item" aria-labelledby="title-ind">
-            <div style="display: flex; justify-content: space-between;">
-              <h3 id="title-ind" style="font-size: 1.1rem; color: var(--gold);">⚙️ ฐานวิศวกรรมอุตสาหกรรม</h3>
-              <span id="badge-ind" style="color: var(--text-muted); font-size: 0.9rem;">ระดับ 1</span>
-            </div>
-            <div class="sector-stats">
-              <span id="ind-output">ผลผลิต: 55 วัตถุดิบ/ปี</span>
-              <span id="ind-discount">ส่วนลดก่อสร้าง: 0%</span>
-            </div>
-            <button id="btn-upgrade-ind" class="btn btn-gold" type="button">
-              ยกระดับอุตสาหกรรม (200 เหรียญ, 40 วัตถุดิบ)
-            </button>
-          </article>
-        </div>
-      </section>
+        </main>
 
-      <!-- Chronicle Log -->
-      <section aria-labelledby="heading-chronicle" style="margin-bottom: 20px;">
-        <div class="card">
-          <h2 id="heading-chronicle" class="card-title">
-            <span id="txt-chronicle-heading">📖 จดหมายเหตุประวัติศาสตร์แผ่นดิน</span>
-          </h2>
-          <ul id="chronicle-list" class="chronicle-box" aria-label="บันทึกเหตุการณ์ในอดีต"></ul>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- Sticky Conclude Year Action -->
-    <div class="sticky-actions">
-      <div class="sticky-container">
-        <button id="btn-conclude" class="btn btn-gold" style="width: 100%; min-height: 60px; font-size: 1.2rem;" type="button" disabled>
-          👑 สรุปปีที่ 1 และประกาศใช้พระบรมราชโองการ
-        </button>
-      </div>
     </div>
 
-  </div>
+    <!-- Transport Modal -->
+    <div id="transport-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="transport-title">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 id="transport-title" class="text-base font-bold text-amber-400 flex items-center gap-2">
+                    🚌 ระบบขนส่งและยานพาหนะ
+                </h3>
+                <button onclick="closeTransportModal()" class="text-slate-400 hover:text-white font-bold text-base px-2">✕</button>
+            </div>
+            <p class="text-xs text-slate-400">ซื้อยานพาหนะเพื่อกระจายสินค้า ส่งคนงานไปทำงาน และเพิ่มรายได้เข้าคลังทุกรอบ</p>
+            
+            <div id="transport-vehicle-list" class="flex flex-col gap-2.5 max-h-[60vh] overflow-y-auto pr-1"></div>
 
-  <!-- End Game Modal -->
-  <div id="modal-overlay" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="modal-heading">
-    <div id="modal-box" class="modal-dialog">
-      <h2 id="modal-heading" style="font-size: 1.6rem;">สิ้นสุดรัชสมัย</h2>
-      <p id="modal-desc" style="color: var(--text-muted);"></p>
-      <button id="btn-modal-restart" class="btn btn-gold" type="button">
-        ↺ เริ่มต้นรัชสมัยใหม่อีกครั้ง
-      </button>
+            <div class="flex justify-end pt-2 border-t border-slate-800">
+                <button onclick="closeTransportModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition">ปิดหน้าต่าง</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    (function () {
-      'use strict';
+    <!-- Event Modal (Interactive) -->
+    <div id="event-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="event-title">
+        <div class="bg-slate-900 border-2 border-rose-500 rounded-2xl max-w-md w-full p-5 shadow-2xl flex flex-col gap-4 ring-4 ring-rose-950/50">
+            <div class="flex items-start gap-3 border-b border-slate-800 pb-3">
+                <span class="text-3xl" id="event-icon">⚠️</span>
+                <div>
+                    <h3 id="event-title" class="text-base font-bold text-rose-400">
+                        แจ้งเตือนเหตุการณ์สำคัญ
+                    </h3>
+                    <p id="event-desc" class="text-xs text-slate-300 mt-0.5">
+                        คำอธิบายเหตุการณ์...
+                    </p>
+                </div>
+            </div>
 
-      /* --- i18n Localization Data --- */
-      let currentLang = 'th'; // Base default: Thai
+            <div class="text-xs text-amber-300 font-bold">
+                👉 โปรดเลือกการตัดสินใจของคุณ:
+            </div>
+            
+            <div id="event-choices" class="flex flex-col gap-2.5">
+                <!-- Dynamic choices injected here -->
+            </div>
+        </div>
+    </div>
 
-      const I18N = {
-        th: {
-          appTitle: "Statecraft: มหาจักรวรรดิแห่งการปกครอง",
-          reignYear: (y) => `ปีที่ ${y} แห่งการครองราชย์ — สภาการปกครองสูงสุด`,
-          langBtn: "🌐 ภาษา: ไทย",
-          langAria: "สลับภาษาเป็นภาษาอังกฤษ",
-          soundOn: "🔊 เสียง: เปิด",
-          soundOff: "🔇 เสียง: ปิด",
-          restartBtn: "↺ เริ่มใหม่",
-          restartConfirm: "ท่านต้องการสละราชบัลลังก์และเริ่มรัชกาลใหม่หรือไม่?",
-          vitalsAria: "สรุปข้อมูลสถานะของประเทศ",
-          lblGold: "คลังหลวง",
-          lblPop: "ประชากร",
-          lblFood: "เสบียงอาหาร",
-          lblHappy: "ความพึงพอใจ",
-          lblMat: "วัสดุก่อสร้าง",
-          perYear: "ปี",
-          maxCap: "สูงสุด",
-          streakLabel: "ยุครุ่งเรือง",
-          dilemmaHeading: "📜 ญัตติข้อหารือแห่งสภาประจำปี",
-          ratifiedLabel: "✓ พระราชกฤษฎีกามีผลบังคับใช้แล้ว:",
-          sectorsHeading: "🛠️ สี่เขตการปกครองหลัก",
-          chronicleHeading: "📖 จดหมายเหตุประวัติศาสตร์แผ่นดิน",
-          concludeBtnReady: (y) => `👑 สรุปปีที่ ${y} และประกาศใช้พระบรมราชโองการ`,
-          concludeBtnWait: (y) => `👑 รอมติสภาสำหรับปีที่ ${y}`,
-          concludeAria: (y, res) => res ? `สรุปการบริหารปีที่ ${y} กดสองครั้งเพื่อผ่านสู่ปีถัดไป` : `ยังไม่สามารถสรุปปีที่ ${y} ได้ ต้องเลือกมติสภาก่อน`,
-          agriTitle: "🌾 เขตเกษตรกรรมลุ่มน้ำ",
-          agriRole: "ป้องกันภาวะอดอยาก",
-          commTitle: "🪙 ศูนย์กลางการพาณิชย์",
-          civicTitle: "🏛️ สานุศิษย์นครบาล",
-          civicRole: "สร้างความสุขและเสถียรภาพ",
-          indTitle: "⚙️ ฐานวิศวกรรมอุตสาหกรรม",
-          levelTxt: (lvl) => `ระดับ ${lvl}`,
-          outputAgri: (v) => `ผลผลิต: ${v} อาหาร/ปี`,
-          outputComm: (v) => `ตลาดการค้า: ${v} เหรียญ/ปี`,
-          taxComm: (v) => `ภาษี: +${v} เหรียญ`,
-          outputCivic: (v) => `รองรับที่อยู่อาศัย: ${v} คน`,
-          outputInd: (v) => `ผลผลิต: ${v} วัตถุดิบ/ปี`,
-          discountInd: (v) => `ส่วนลดก่อสร้าง: ${v}%`,
-          upgradeBtn: (name, g, m) => `ยกระดับ${name} (${g} เหรียญ, ${m} วัตถุดิบ)`,
-          upgradeNames: { agri: "เขตเกษตรกรรม", comm: "ศูนย์การค้า", civic: "นครบาล", ind: "อุตสาหกรรม" },
-          rationBtn: "นโยบายปันส่วน:",
-          taxBtn: "นโยบายภาษี:",
-          festBtn: "งานเทศกาล:",
-          modalRestart: "↺ เริ่มต้นรัชสมัยใหม่อีกครั้ง",
-          decreeRatifiedSpeech: (t) => `ตราพระบรมราชโองการ: ${t} เรียบร้อยแล้ว`,
-          starvedNotice: (d) => `เกิดทุพภิกขภัย ประชาชนล้มตาย ${d} คน!`,
-          popGrowthNotice: "ประชากรเติบโตอย่างมั่นคง",
-          yearBeganSpeech: (y, summ) => `เริ่มต้นปีที่ ${y} สรุปปีก่อนหน้า: ${summ} มีญัตติสภาใหม่รอการตัดสินใจ`,
-          welcomeSpeech: "ยินดีต้อนรับสู่ Statecraft เริ่มต้นปีที่ 1 คลังหลวง 500 เหรียญ ประชากร 100 คน เลื่อนเพื่อตรวจดูสถานะและตัดสินมติสภา",
-          newReignSpeech: "รัชสมัยใหม่เริ่มต้นขึ้นแล้ว ปีที่ 1 คลังหลวง 500 เหรียญ ประชากร 100 คน",
-          coronationChronicle: "ปีที่ 1: พิธีบรมราชาภิเษก เสด็จขึ้นครองราชย์ด้วยเงินคลัง 500 เหรียญ ประชากร 100 คน"
-        },
-        en: {
-          appTitle: "Statecraft: Realm of Governance",
-          reignYear: (y) => `Year ${y} of Reign — Sovereign Council`,
-          langBtn: "🌐 Lang: EN",
-          langAria: "Switch language to Thai",
-          soundOn: "🔊 Sound: On",
-          soundOff: "🔇 Sound: Off",
-          restartBtn: "↺ Restart",
-          restartConfirm: "Abdicate the throne and begin a brand new sovereign reign?",
-          vitalsAria: "National Metrics Summary",
-          lblGold: "Treasury",
-          lblPop: "Population",
-          lblFood: "Granary",
-          lblHappy: "Approval",
-          lblMat: "Materials",
-          perYear: "yr",
-          maxCap: "Max",
-          streakLabel: "Golden Age",
-          dilemmaHeading: "📜 Annual Council Dilemma",
-          ratifiedLabel: "✓ Imperial Decree Ratified:",
-          sectorsHeading: "🛠️ Four Realm Sectors",
-          chronicleHeading: "📖 Historical Imperial Chronicle",
-          concludeBtnReady: (y) => `👑 Conclude Year ${y} & Enact Decrees`,
-          concludeBtnWait: (y) => `👑 Awaiting Year ${y} Council Decree`,
-          concludeAria: (y, res) => res ? `Conclude Year ${y} decrees. Double tap to advance.` : `Cannot conclude Year ${y}. Resolve council dilemma first.`,
-          agriTitle: "🌾 Agricultural Basin",
-          agriRole: "Prevents Famine",
-          commTitle: "🪙 Commercial Hub",
-          civicTitle: "🏛️ Civic Sanctuary",
-          civicRole: "Protects Morale",
-          indTitle: "⚙️ Industrial Core",
-          levelTxt: (lvl) => `Level ${lvl}`,
-          outputAgri: (v) => `Output: ${v} Food/yr`,
-          outputComm: (v) => `Market: ${v} Gold/yr`,
-          taxComm: (v) => `Tax: +${v} Gold`,
-          outputCivic: (v) => `Housing Cap: ${v}`,
-          outputInd: (v) => `Yield: ${v} Materials/yr`,
-          discountInd: (v) => `Discount: ${v}%`,
-          upgradeBtn: (name, g, m) => `Upgrade ${name} (${g} Gold, ${m} Mat)`,
-          upgradeNames: { agri: "Basin", comm: "Hub", civic: "Sanctuary", ind: "Core" },
-          rationBtn: "Rationing:",
-          taxBtn: "Taxes:",
-          festBtn: "Festivals:",
-          modalRestart: "↺ Begin New Sovereign Reign",
-          decreeRatifiedSpeech: (t) => `Decree ratified: ${t}.`,
-          starvedNotice: (d) => `Famine strike! ${d} perished from starvation!`,
-          popGrowthNotice: "Population grew steadily.",
-          yearBeganSpeech: (y, summ) => `Year ${y} has begun. Last year: ${summ} A new council dilemma awaits.`,
-          welcomeSpeech: "Welcome to Statecraft. Year 1 has begun. 500 Gold, 100 Citizens. Swipe to review metrics and resolve the council dilemma.",
-          newReignSpeech: "A new sovereign reign has begun. Year 1. 500 Gold, 100 Citizens.",
-          coronationChronicle: "Year 1: Coronation. Ascended throne with 500 Gold, 100 Citizens."
-        }
-      };
-
-      /* --- Audio Synthesizer --- */
-      class SoundEngine {
-        constructor() {
-          this.ctx = null;
-          this.enabled = true;
-        }
-        init() {
-          if (!this.ctx) {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (AudioCtx) this.ctx = new AudioCtx();
-          }
-          if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
-          }
-        }
-        play(freq, type = 'sine', duration = 0.1, gain = 0.15, delay = 0) {
-          if (!this.enabled) return;
-          try {
-            this.init();
-            if (!this.ctx) return;
-            const osc = this.ctx.createOscillator();
-            const g = this.ctx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
-            g.gain.setValueAtTime(gain, this.ctx.currentTime + delay);
-            g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + delay + duration);
-            osc.connect(g);
-            g.connect(this.ctx.destination);
-            osc.start(this.ctx.currentTime + delay);
-            osc.stop(this.ctx.currentTime + delay + duration);
-          } catch(e) {}
-        }
-        tap() { this.play(440, 'sine', 0.05, 0.08); }
-        upgrade() {
-          this.play(523.25, 'triangle', 0.1, 0.12, 0);
-          this.play(659.25, 'triangle', 0.12, 0.12, 0.08);
-          this.play(783.99, 'sine', 0.18, 0.14, 0.16);
-        }
-        advance() {
-          this.play(440, 'triangle', 0.1, 0.12, 0);
-          this.play(554.37, 'triangle', 0.12, 0.12, 0.08);
-          this.play(659.25, 'sine', 0.2, 0.14, 0.16);
-        }
-        danger() {
-          this.play(180, 'sawtooth', 0.2, 0.15, 0);
-          this.play(140, 'sawtooth', 0.25, 0.18, 0.1);
-        }
-        victory() {
-          [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.play(f, 'sine', 0.3, 0.15, i * 0.1));
-        }
-      }
-
-      const audio = new SoundEngine();
-
-      /* --- Policy Definitions with Bilingual Data --- */
-      const RATION_POLICIES = [
-        {
-          ratio: 0.8,
-          happyDelta: -5,
-          name: { th: "จำกัดเข้มงวด (0.8x)", en: "Austere (0.8x)" },
-          desc: { 
-            th: "ประชาชนกินอาหารลดลง 20% ประหยัดเสบียงแต่สูญเสียความสุข -5% ต่อปี", 
-            en: "Citizens eat 20% less food. Saves grain, but incurs -5% Approval each year." 
-          }
-        },
-        {
-          ratio: 1.0,
-          happyDelta: 0,
-          name: { th: "มาตรฐาน (1.0x)", en: "Standard (1.0x)" },
-          desc: { 
-            th: "บริโภคตามเกณฑ์ปกติ (1 อาหารต่อคน) เสถียรภาพมั่นคง ไม่ส่งผลต่อความสุข", 
-            en: "Baseline consumption (1 Food per citizen). Stable morale with no penalty." 
-          }
-        },
-        {
-          ratio: 1.25,
-          happyDelta: +4,
-          name: { th: "อุดมสมบูรณ์ (1.25x)", en: "Generous (1.25x)" },
-          desc: { 
-            th: "ประชาชนกินอาหารเพิ่มขึ้น 25% เปลืองเสบียงขึ้นแต่เพิ่มความสุข +4% ต่อปี", 
-            en: "Citizens eat 25% more food. Costs extra grain, but awards +4% Approval each year." 
-          }
-        }
-      ];
-
-      const TAX_POLICIES = [
-        {
-          rate: 0.10,
-          happyDelta: +3,
-          name: { th: "ต่ำ (10%)", en: "Low (10%)" },
-          desc: { 
-            th: "เก็บภาษีเบาบาง ได้รับเหรียญน้อยลง แต่ประชาชนสุขใจเพิ่มขึ้น +3% ต่อปี", 
-            en: "Gentle taxation. Lower gold revenue, but rewards +3% Approval each year." 
-          }
-        },
-        {
-          rate: 0.15,
-          happyDelta: 0,
-          name: { th: "ปานกลาง (15%)", en: "Moderate (15%)" },
-          desc: { 
-            th: "อัตราภาษีมาตรฐาน รายได้สมดุล ประชาชนพึงพอใจในระดับปกติ", 
-            en: "Balanced taxation. Standard crown revenue with neutral citizen morale." 
-          }
-        },
-        {
-          rate: 0.22,
-          happyDelta: -6,
-          name: { th: "ขูดรีดสูง (22%)", en: "Heavy (22%)" },
-          desc: { 
-            th: "จัดเก็บภาษีหนักหน่วง ได้เงินเข้าคลังสูงสุด แต่ลดทอนความสุข -6% ต่อปี", 
-            en: "Aggressive taxation. Maximum gold extraction, but incites -6% Approval each year." 
-          }
-        }
-      ];
-
-      const FESTIVAL_POLICIES = [
-        {
-          cost: 0,
-          happyDelta: 0,
-          name: { th: "งดจัดงาน (0 เหรียญ)", en: "None (0 Gold)" },
-          desc: { 
-            th: "ไม่อนุมัติงบเทศกาล ประหยัดเงินคงคลัง ไม่ได้รับโบนัสความสุข", 
-            en: "No public festivities funded. Zero treasury cost, no morale bonus." 
-          }
-        },
-        {
-          cost: 15,
-          happyDelta: +2,
-          name: { th: "ธรรมดา (15 เหรียญ)", en: "Modest (15 Gold)" },
-          desc: { 
-            th: "จัดงานรื่นเริงประจำปี จ่าย 15 เหรียญ มอบความสุขแก่ราษฎร +2% ต่อปี", 
-            en: "Annual parish feasts costing 15 Gold. Grants +2% Approval each year." 
-          }
-        },
-        {
-          cost: 40,
-          happyDelta: +5,
-          name: { th: "มโหฬาร (40 เหรียญ)", en: "Grand (40 Gold)" },
-          desc: { 
-            th: "มหกรรมเฉลิมฉลองทั่วแผ่นดิน จ่าย 40 เหรียญ เพิ่มความสุขอย่างมาก +5% ต่อปี", 
-            en: "Grand carnivals costing 40 Gold. Grants +5% Approval each year." 
-          }
-        }
-      ];
-
-      /* --- Bilingual Dilemmas --- */
-      const DILEMMAS = [
-        {
-          id: "harvest",
-          title: { th: "วารีหล่อเลี้ยงผลผลิตล้นหลาม", en: "Bountiful Autumn Rains" },
-          desc: { 
-            th: "ฤดูฝนที่ผ่านมาส่งผลให้รวงข้าวในทุ่งนาออกผลเกินคาด พ่อค้าเสนอส่งออกขายทางเรือ ส่วนข้าราชบริพารแนะนำให้เปิดลานเลี้ยงอาหารราษฎร", 
-            en: "A surprise harvest has flooded grain markets. Sell reserves to foreign merchants or grant extra food to the peasantry?" 
-          },
-          choiceA: {
-            title: { th: "จัดงานเลี้ยงฉลองผลผลิต", en: "Hold Public Feast" },
-            desc: { th: "ใช้เสบียง 50 หน่วย, เพิ่มความสุข +8%", en: "-50 Food, +8% Happiness" },
-            apply: s => { s.food = Math.max(0, s.food - 50); s.happiness = Math.min(100, s.happiness + 8); }
-          },
-          choiceB: {
-            title: { th: "ส่งออกเสบียงขายต่างแดน", en: "Export Grain" },
-            desc: { th: "ส่งออก 60 หน่วย, ได้รับทอง +120 เหรียญ", en: "-60 Food, +120 Gold" },
-            apply: s => { s.food = Math.max(0, s.food - 60); s.gold += 120; }
-          }
-        },
-        {
-          id: "silk_road",
-          title: { th: "คาราวานแพรพรรณขอเปิดด่าน", en: "The Silk Caravan Toll" },
-          desc: { 
-            th: "กองคาราวานวาณิชจากแดนไกลขอรับสิทธิยกเว้นภาษีศุลกากร เพื่อตั้งคลังสินค้าขนาดใหญ่ในเขตการค้าของท่าน", 
-            en: "A massive caravan petitions for tariff exemptions to establish trade warehouses in your commercial district." 
-          },
-          choiceA: {
-            title: { th: "เก็บภาษีเต็มอัตราหลวง", en: "Enforce Standard Tariffs" },
-            desc: { th: "ได้รับทอง +150 เหรียญ เข้าคลังทันที", en: "+150 Gold immediately" },
-            apply: s => { s.gold += 150; }
-          },
-          choiceB: {
-            title: { th: "มอบสัมปทานยกเว้นภาษี", en: "Grant Exemption" },
-            desc: { th: "ได้รับของกำนัลเป็นวัตถุดิบ +35 หน่วย, ความสุข +4%", en: "+35 Materials, +4% Happiness" },
-            apply: s => { s.materials += 35; s.happiness = Math.min(100, s.happiness + 4); }
-          }
-        },
-        {
-          id: "quarry",
-          title: { th: "ข้อเรียกร้องแห่งช่างสลักหิน", en: "Quarry Safety Petitions" },
-          desc: { 
-            th: "คนงานในเขตเหมืองอุตสาหกรรมขู่จะนัดหยุดงานประท้วง เนื่องจากโครงค้ำยันอุโมงค์หินทรุดตัวและขาดความปลอดภัย", 
-            en: "Industrial quarry workers threaten a strike over hazardous mine tunnels." 
-          },
-          choiceA: {
-            title: { th: "จัดสรรงบเสริมความปลอดภัย", en: "Fund Safety Bracing" },
-            desc: { th: "จ่าย 70 เหรียญ, เพิ่มความสุข +5%, ได้วัตถุดิบ +20", en: "-70 Gold, +5% Happiness, +20 Materials" },
-            apply: s => { s.gold = Math.max(0, s.gold - 70); s.happiness = Math.min(100, s.happiness + 5); s.materials += 20; }
-          },
-          choiceB: {
-            title: { th: "บังคับเกณฑ์แรงงานส่งงานตามกำหนด", en: "Mandate Quotas" },
-            desc: { th: "ได้รับวัตถุดิบ +45 หน่วยทันที, แต่เสียความสุข -6%", en: "+45 Materials immediately, -6% Happiness" },
-            apply: s => { s.materials += 45; s.happiness = Math.max(0, s.happiness - 6); }
-          }
-        },
-        {
-          id: "refugees",
-          title: { th: "ผู้อพยพลี้ภัยสงครามชายแดน", en: "Borderland Travelers" },
-          desc: { 
-            th: "คาราวานผู้ลี้ภัยนับสิบครอบครัวหนีภัยสงครามจากแคว้นเพื่อนบ้าน มายืนอ้อนวอนขอพึ่งพระบารมีอยู่หน้าประตูกำแพงเมือง", 
-            en: "Refugees seeking settlement stand before the city gates." 
-          },
-          choiceA: {
-            title: { th: "เปิดประตูรับเข้าเป็นประชากร", en: "Integrate Immigrants" },
-            desc: { th: "เพิ่มประชากร +30 คน, เพิ่มความสุข +3%", en: "+30 Citizens, +3% Happiness" },
-            apply: s => { s.population += 30; s.happiness = Math.min(100, s.happiness + 3); }
-          },
-          choiceB: {
-            title: { th: "แจกจ่ายเสบียงแล้วส่งตัวกลับ", en: "Offer Rations & Turn Away" },
-            desc: { th: "เสียเสบียง 35 หน่วย เพื่อความปลอดภัยในกำแพง", en: "-35 Food" },
-            apply: s => { s.food = Math.max(0, s.food - 35); }
-          }
-        },
-        {
-          id: "canal",
-          title: { th: "วิกฤตตะกอนอุดตันคลองชลประทาน", en: "Canal Maintenance Urgency" },
-          desc: { 
-            th: "ดินตะกอนทับถมร่องน้ำสายหลักที่หล่อเลี้ยงพื้นที่เกษตร หากไม่เร่งขุดลอก แปลงเพาะปลูกจะขาดน้ำในฤดูเก็บเกี่ยว", 
-            en: "Silt builds up along irrigation waterways, threatening the harvest." 
-          },
-          choiceA: {
-            title: { th: "เกณฑ์ช่างระดมขุดลอกด่วน", en: "Dredge Canals Promptly" },
-            desc: { th: "จ่าย 60 เหรียญ, 20 วัตถุดิบ, ได้ผลผลิต +40 อาหาร", en: "-60 Gold, -20 Materials, +40 Food" },
-            apply: s => { s.gold = Math.max(0, s.gold - 60); s.materials = Math.max(0, s.materials - 20); s.food += 40; }
-          },
-          choiceB: {
-            title: { th: "ชะลอการซ่อมแซมไว้ก่อน", en: "Postpone Dredging" },
-            desc: { th: "สูญเสียเสบียง 50 หน่วย, ความสุข -4%", en: "-50 Food, -4% Happiness" },
-            apply: s => { s.food = Math.max(0, s.food - 50); s.happiness = Math.max(0, s.happiness - 4); }
-          }
-        }
-      ];
-
-      /* --- End Game Outcomes (Bilingual) --- */
-      const END_OUTCOMES = {
-        utopia: {
-          victory: true,
-          title: { th: "ชัยชนะ: ยุคทองแห่งยูโทเปีย", en: "Victory: Utopian Golden Age" },
-          desc: { 
-            th: "มหาราชาผู้ทรงธรรม! ท่านรักษาความสุขของราษฎรเกิน 85% ติดต่อกันถึง 4 ปี โดยไม่มีผู้ใดอดอยาก ท่ามกลางประชากรที่รุ่งเรืองไพบูลย์", 
-            en: "Maintained 85%+ approval for 4 consecutive years with zero famine and a flourishing populace." 
-          }
-        },
-        hegemony: {
-          victory: true,
-          title: { th: "ชัยชนะ: มหาอำนาจทางเศรษฐกิจโลก", en: "Victory: Economic Hegemony" },
-          desc: { 
-            th: "มหาเศรษฐีแห่งปวงชน! เงินคลังหลวงทะลุเกิน 10,000 เหรียญทอง อาณาจักรของท่านครองความเป็นเจ้าแห่งเส้นทางการค้า", 
-            en: "Imperial treasury surpassed 10,000 Gold through disciplined fiscal mastery." 
-          }
-        },
-        metropolis: {
-          victory: true,
-          title: { th: "ชัยชนะ: มหานครเอกภพ (Mega-Metropolis)", en: "Victory: Mega-Metropolis" },
-          desc: { 
-            th: "สถาปัตยกรรมไร้เทียมทาน! ประชากรทะลุเกิน 2,000 คน โดยมีที่อยู่อาศัยและระบบสุขาภิบาลรองรับอย่างทั่วถึง", 
-            en: "Governed 2,000+ happy citizens with complete housing coverage." 
-          }
-        },
-        revolution: {
-          victory: false,
-          title: { th: "พ่ายแพ้: การลุกฮือปฏิวัติของประชาชน", en: "Defeat: Popular Revolution" },
-          desc: { 
-            th: "ราษฎรทนทุกข์จนถึงขีดสุด ความพึงพอใจลดต่ำกว่า 20% มวลชนบุกพังประตูพระราชวังและล้มล้างราชบัลลังก์ของท่าน", 
-            en: "Citizen approval fell below 20%. The palace was overthrown in rebellion." 
-          }
-        },
-        bankruptcy: {
-          victory: false,
-          title: { th: "พ่ายแพ้: รัฐล้มละลายทางการเงิน", en: "Defeat: Sovereign Bankruptcy" },
-          desc: { 
-            th: "ท้องพระคลังติดลบจนไม่อาจจ่ายหนี้สิน เจ้าหนี้ต่างแดนและกองทหารเข้ายึดทรัพย์สิน อาณาจักรล่มสลายลง", 
-            en: "The crown accumulated unpayable deficits and defaulted completely." 
-          }
-        },
-        collapse: {
-          victory: false,
-          title: { th: "พ่ายแพ้: การสูญสิ้นเผ่าพันธุ์ประชากร", en: "Defeat: Demographic Collapse" },
-          desc: { 
-            th: "ความอดอยากและโรคระบาดพรากชีวิตผู้คนจนเหลือไม่ถึง 30 คน เมืองหลวงกลายเป็นเมืองร้างในประวัติศาสตร์", 
-            en: "Population fell below 30 citizens due to starvation and flight." 
-          }
-        }
-      };
-
-      /* --- State Model --- */
-      const DEFAULT_STATE = {
-        year: 1,
-        gold: 500,
-        population: 100,
-        food: 300,
-        materials: 100,
-        happiness: 70,
-        streak: 0,
-        sectors: {
-          agri: 1,
-          comm: 1,
-          civic: 1,
-          ind: 1
-        },
-        policies: {
-          ration: 1,
-          tax: 1,
-          fest: 1
-        },
-        dilemmaIndex: 0,
-        resolved: false,
-        resolvedText: { th: '', en: '' },
-        chronicle: [
-          { th: "ปีที่ 1: พิธีบรมราชาภิเษก เสด็จขึ้นครองราชย์ด้วยเงินคลัง 500 เหรียญ ประชากร 100 คน", en: "Year 1: Coronation. Ascended throne with 500 Gold, 100 Citizens." }
-        ]
-      };
-
-      let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-
-      /* --- Economic Formulas --- */
-      const getDiscount = () => Math.min(0.3, (state.sectors.ind - 1) * 0.05);
-
-      function getUpgradeCost(sector) {
-        const lvl = state.sectors[sector];
-        const disc = 1 - getDiscount();
-        const base = {
-          agri: [140, 35],
-          comm: [160, 45],
-          civic: [180, 55],
-          ind: [200, 40]
-        }[sector];
-
-        return {
-          gold: Math.round(base[0] * Math.pow(1.45, lvl - 1) * disc),
-          mat: Math.round(base[1] * Math.pow(1.35, lvl - 1) * disc)
-        };
-      }
-
-      const getFoodProd = () => 110 + state.sectors.agri * 35;
-      const getFoodCons = () => Math.round(state.population * RATION_POLICIES[state.policies.ration].ratio);
-      const getHousing = () => 130 + state.sectors.civic * 120;
-      const getMarket = () => 40 + state.sectors.comm * 30;
-      const getTax = () => Math.round(state.population * TAX_POLICIES[state.policies.tax].rate * 1.2);
-      const getFestCost = () => FESTIVAL_POLICIES[state.policies.fest].cost;
-      const getNetGold = () => getMarket() + getTax() - getFestCost();
-      const getMatProd = () => 35 + state.sectors.ind * 20;
-
-      /* --- DOM Elements --- */
-      const srAlert = document.getElementById('sr-alert');
-      const srStatus = document.getElementById('sr-status');
-      
-      const txtGameTitle = document.getElementById('txt-game-title');
-      const reignYear = document.getElementById('reign-year');
-      const langBtn = document.getElementById('lang-btn');
-      const soundBtn = document.getElementById('sound-btn');
-      const restartBtn = document.getElementById('restart-btn');
-
-      const vitalsSection = document.getElementById('vitals-section');
-      const lblGold = document.getElementById('lbl-gold');
-      const valGold = document.getElementById('val-gold');
-      const subGold = document.getElementById('sub-gold');
-      const lblPop = document.getElementById('lbl-pop');
-      const valPop = document.getElementById('val-pop');
-      const subPop = document.getElementById('sub-pop');
-      const lblFood = document.getElementById('lbl-food');
-      const valFood = document.getElementById('val-food');
-      const subFood = document.getElementById('sub-food');
-      const lblHappy = document.getElementById('lbl-happy');
-      const valHappy = document.getElementById('val-happy');
-      const subHappy = document.getElementById('sub-happy');
-      const lblMat = document.getElementById('lbl-mat');
-      const valMat = document.getElementById('val-mat');
-      const subMat = document.getElementById('sub-mat');
-
-      const txtDilemmaTitle = document.getElementById('txt-dilemma-title');
-      const dilemmaActiveBox = document.getElementById('dilemma-active-box');
-      const dilemmaNarrative = document.getElementById('dilemma-narrative');
-      const choiceABtn = document.getElementById('choice-a');
-      const choiceATitle = document.getElementById('choice-a-title');
-      const choiceADesc = document.getElementById('choice-a-desc');
-      const choiceBBtn = document.getElementById('choice-b');
-      const choiceBTitle = document.getElementById('choice-b-title');
-      const choiceBDesc = document.getElementById('choice-b-desc');
-      const dilemmaResolvedBox = document.getElementById('dilemma-resolved-box');
-      const txtRatifiedLabel = document.getElementById('txt-ratified-label');
-      const resolvedDecreeText = document.getElementById('resolved-decree-text');
-
-      const txtSectorsHeading = document.getElementById('txt-sectors-heading');
-      const titleAgri = document.getElementById('title-agri');
-      const agriRole = document.getElementById('agri-role');
-      const titleComm = document.getElementById('title-comm');
-      const titleCivic = document.getElementById('title-civic');
-      const civicRole = document.getElementById('civic-role');
-      const titleInd = document.getElementById('title-ind');
-
-      const btnRation = document.getElementById('btn-ration');
-      const subRation = document.getElementById('sub-ration');
-      const btnTax = document.getElementById('btn-tax');
-      const subTax = document.getElementById('sub-tax');
-      const btnFestival = document.getElementById('btn-festival');
-      const subFestival = document.getElementById('sub-festival');
-
-      const btnUpgradeAgri = document.getElementById('btn-upgrade-agri');
-      const btnUpgradeComm = document.getElementById('btn-upgrade-comm');
-      const btnUpgradeCivic = document.getElementById('btn-upgrade-civic');
-      const btnUpgradeInd = document.getElementById('btn-upgrade-ind');
-
-      const badgeAgri = document.getElementById('badge-agri');
-      const badgeComm = document.getElementById('badge-comm');
-      const badgeCivic = document.getElementById('badge-civic');
-      const badgeInd = document.getElementById('badge-ind');
-
-      const agriOutput = document.getElementById('agri-output');
-      const commOutput = document.getElementById('comm-output');
-      const commTax = document.getElementById('comm-tax');
-      const civicOutput = document.getElementById('civic-output');
-      const indOutput = document.getElementById('ind-output');
-      const indDiscount = document.getElementById('ind-discount');
-
-      const txtChronicleHeading = document.getElementById('txt-chronicle-heading');
-      const chronicleList = document.getElementById('chronicle-list');
-
-      const btnConclude = document.getElementById('btn-conclude');
-
-      const modalOverlay = document.getElementById('modal-overlay');
-      const modalHeading = document.getElementById('modal-heading');
-      const modalDesc = document.getElementById('modal-desc');
-      const btnModalRestart = document.getElementById('btn-modal-restart');
-
-      function announce(msg, assertive = false) {
-        const el = assertive ? srAlert : srStatus;
-        el.textContent = '';
-        setTimeout(() => { el.textContent = msg; }, 40);
-      }
-
-      function updateUI() {
-        const t = I18N[currentLang];
-        document.documentElement.lang = currentLang;
-
-        // Static Text
-        txtGameTitle.textContent = t.appTitle;
-        reignYear.textContent = t.reignYear(state.year);
-        langBtn.textContent = t.langBtn;
-        langBtn.setAttribute('aria-label', t.langAria);
-        soundBtn.textContent = audio.enabled ? t.soundOn : t.soundOff;
-        soundBtn.setAttribute('aria-pressed', audio.enabled ? 'true' : 'false');
-        restartBtn.textContent = t.restartBtn;
-        vitalsSection.setAttribute('aria-label', t.vitalsAria);
-
-        lblGold.textContent = t.lblGold;
-        lblPop.textContent = t.lblPop;
-        lblFood.textContent = t.lblFood;
-        lblHappy.textContent = t.lblHappy;
-        lblMat.textContent = t.lblMat;
-
-        txtDilemmaTitle.textContent = t.dilemmaHeading;
-        txtRatifiedLabel.textContent = t.ratifiedLabel;
-        txtSectorsHeading.textContent = t.sectorsHeading;
-        txtChronicleHeading.textContent = t.chronicleHeading;
-
-        titleAgri.textContent = t.agriTitle;
-        agriRole.textContent = t.agriRole;
-        titleComm.textContent = t.commTitle;
-        titleCivic.textContent = t.civicTitle;
-        civicRole.textContent = t.civicRole;
-        titleInd.textContent = t.indTitle;
-
-        // Vitals Values
-        const netG = getNetGold();
-        valGold.textContent = state.gold;
-        subGold.textContent = `${netG >= 0 ? '+' : ''}${netG} / ${t.perYear}`;
-        subGold.className = `vital-sub ${netG >= 0 ? 'positive' : 'negative'}`;
-
-        const housing = getHousing();
-        valPop.textContent = state.population;
-        subPop.textContent = `${t.maxCap}: ${housing}`;
-        subPop.className = `vital-sub ${state.population > housing ? 'negative' : ''}`;
-
-        const foodProd = getFoodProd();
-        const foodCons = getFoodCons();
-        const netFood = foodProd - foodCons;
-        valFood.textContent = state.food;
-        subFood.textContent = `${netFood >= 0 ? '+' : ''}${netFood} / ${t.perYear}`;
-        subFood.className = `vital-sub ${netFood >= 0 ? 'positive' : 'negative'}`;
-
-        valHappy.textContent = `${state.happiness}%`;
-        subHappy.textContent = `${t.streakLabel}: ${state.streak}/4`;
-        valHappy.className = `vital-value ${state.happiness < 30 ? 'negative' : (state.happiness >= 85 ? 'positive' : '')}`;
-
-        valMat.textContent = state.materials;
-        subMat.textContent = `+${getMatProd()} / ${t.perYear}`;
-
-        // Dilemma
-        const currentDilemma = DILEMMAS[state.dilemmaIndex];
-        if (state.resolved) {
-          dilemmaActiveBox.style.display = 'none';
-          dilemmaResolvedBox.style.display = 'block';
-          resolvedDecreeText.textContent = state.resolvedText[currentLang];
-        } else if (currentDilemma) {
-          dilemmaActiveBox.style.display = 'flex';
-          dilemmaResolvedBox.style.display = 'none';
-          dilemmaNarrative.textContent = `${currentDilemma.title[currentLang]}: ${currentDilemma.desc[currentLang]}`;
-          choiceATitle.textContent = currentDilemma.choiceA.title[currentLang];
-          choiceADesc.textContent = currentDilemma.choiceA.desc[currentLang];
-          choiceBTitle.textContent = currentDilemma.choiceB.title[currentLang];
-          choiceBDesc.textContent = currentDilemma.choiceB.desc[currentLang];
-        }
-
-        // Policies
-        const curRation = RATION_POLICIES[state.policies.ration];
-        btnRation.querySelector('span:first-child').innerHTML = `${t.rationBtn} <strong>${curRation.name[currentLang]}</strong>`;
-        subRation.textContent = `${curRation.desc[currentLang]} (${t.lblFood}: ${foodCons}/${t.perYear})`;
-        btnRation.setAttribute('aria-label', `${t.rationBtn} ${curRation.name[currentLang]}. ${curRation.desc[currentLang]}`);
-
-        const curTax = TAX_POLICIES[state.policies.tax];
-        const taxGoldYield = getTax();
-        btnTax.querySelector('span:first-child').innerHTML = `${t.taxBtn} <strong>${curTax.name[currentLang]}</strong>`;
-        subTax.textContent = `${curTax.desc[currentLang]} (+${taxGoldYield} ${t.lblGold}/${t.perYear})`;
-        btnTax.setAttribute('aria-label', `${t.taxBtn} ${curTax.name[currentLang]}. ${curTax.desc[currentLang]}`);
-
-        const curFest = FESTIVAL_POLICIES[state.policies.fest];
-        btnFestival.querySelector('span:first-child').innerHTML = `${t.festBtn} <strong>${curFest.name[currentLang]}</strong>`;
-        subFestival.textContent = curFest.desc[currentLang];
-        btnFestival.setAttribute('aria-label', `${t.festBtn} ${curFest.name[currentLang]}. ${curFest.desc[currentLang]}`);
-
-        // Sector Badges & Yields
-        badgeAgri.textContent = t.levelTxt(state.sectors.agri);
-        badgeComm.textContent = t.levelTxt(state.sectors.comm);
-        badgeCivic.textContent = t.levelTxt(state.sectors.civic);
-        badgeInd.textContent = t.levelTxt(state.sectors.ind);
-
-        agriOutput.textContent = t.outputAgri(foodProd);
-        commOutput.textContent = t.outputComm(getMarket());
-        commTax.textContent = t.taxComm(taxGoldYield);
-        civicOutput.textContent = t.outputCivic(housing);
-        indOutput.textContent = t.outputInd(getMatProd());
-        indDiscount.textContent = t.discountInd(Math.round(getDiscount() * 100));
-
-        // Upgrades
-        const costAgri = getUpgradeCost('agri');
-        const costComm = getUpgradeCost('comm');
-        const costCivic = getUpgradeCost('civic');
-        const costInd = getUpgradeCost('ind');
-
-        btnUpgradeAgri.textContent = t.upgradeBtn(t.upgradeNames.agri, costAgri.gold, costAgri.mat);
-        btnUpgradeComm.textContent = t.upgradeBtn(t.upgradeNames.comm, costComm.gold, costComm.mat);
-        btnUpgradeCivic.textContent = t.upgradeBtn(t.upgradeNames.civic, costCivic.gold, costCivic.mat);
-        btnUpgradeInd.textContent = t.upgradeBtn(t.upgradeNames.ind, costInd.gold, costInd.mat);
-
-        btnUpgradeAgri.disabled = state.gold < costAgri.gold || state.materials < costAgri.mat;
-        btnUpgradeComm.disabled = state.gold < costComm.gold || state.materials < costComm.mat;
-        btnUpgradeCivic.disabled = state.gold < costCivic.gold || state.materials < costCivic.mat;
-        btnUpgradeInd.disabled = state.gold < costInd.gold || state.materials < costInd.mat;
-
-        // Conclude Button
-        btnConclude.textContent = state.resolved ? t.concludeBtnReady(state.year) : t.concludeBtnWait(state.year);
-        btnConclude.setAttribute('aria-label', t.concludeAria(state.year, state.resolved));
-        btnConclude.disabled = !state.resolved;
-
-        // Modal Button
-        btnModalRestart.textContent = t.modalRestart;
-
-        // History Log
-        chronicleList.innerHTML = '';
-        state.chronicle.slice(0, 15).forEach(entry => {
-          const li = document.createElement('li');
-          li.className = 'chronicle-item';
-          li.textContent = entry[currentLang];
-          chronicleList.appendChild(li);
-        });
-      }
-
-      function pullDilemma() {
-        state.dilemmaIndex = Math.floor(Math.random() * DILEMMAS.length);
-        state.resolved = false;
-        state.resolvedText = { th: '', en: '' };
-      }
-
-      function resolveChoice(type) {
-        audio.tap();
-        const currentDilemma = DILEMMAS[state.dilemmaIndex];
-        if (!currentDilemma || state.resolved) return;
-
-        const choice = type === 'A' ? currentDilemma.choiceA : currentDilemma.choiceB;
-        choice.apply(state);
-
-        state.resolved = true;
-        state.resolvedText = {
-          th: `${choice.title.th}: ${choice.desc.th}`,
-          en: `${choice.title.en}: ${choice.desc.en}`
+    <script>
+        // Game State (Simplified & Robust)
+        const state = {
+            gold: 1000,
+            pop: 20,
+            education: 50,
+            food: 50,
+            power: 100,
+            happy: 80,
+            turn: 1,
+            zone: 'land', // 'land' or 'sea'
+            selectedBuilding: 'house',
+            sfx: true,
+            tts: false,
+            contrast: false,
+            activeEvent: null,
+            landTiles: Array(25).fill(null),
+            seaTiles: Array(25).fill(null),
+            vehicles: {
+                bus: { name: 'รถบัสคนงาน', icon: '🚌', count: 1, cost: 200, income: 35, happy: 3, desc: '+35 💰/รอบ, +3% สุข' },
+                truck: { name: 'รถบรรทุกสินค้า', icon: '🚚', count: 1, cost: 250, income: 45, happy: 0, desc: '+45 💰/รอบ' },
+                ship: { name: 'เรือสินค้าพาณิชย์', icon: '🚢', count: 0, cost: 400, income: 75, food: 15, happy: 2, desc: '+75 💰/รอบ, +15 อาหาร' }
+            }
         };
 
-        const yearLabel = currentLang === 'th' ? `ปีที่ ${state.year}` : `Year ${state.year}`;
-        state.chronicle.unshift({
-          th: `${yearLabel}: พระบรมราชโองการ ${choice.title.th} (${choice.desc.th})`,
-          en: `Year ${state.year}: Decree ${choice.title.en} (${choice.desc.en})`
+        // Interactive Events
+        const EVENTS = [
+            {
+                id: 'fire',
+                icon: '🔥',
+                title: 'เหตุเพลิงไหม้ชุมชน!',
+                desc: 'เกิดไฟลุกไหม้รุนแรงในย่านที่พักอาศัย ต้องการการดับไฟเร่งด่วน',
+                choices: [
+                    {
+                        text: '💰 จ้างทีมดับเพลิงฉุกเฉิน (-200 💰)',
+                        cost: 200,
+                        action: () => {
+                            state.gold -= 200;
+                            return 'ส่งทีมดับเพลิงเข้าควบคุมไฟได้ทัน เมืองปลอดภัย! (-200 💰)';
+                        }
+                    },
+                    {
+                        text: '❌ ไม่จ่ายเงิน (ปล่อยให้ไฟมอดเอง)',
+                        cost: 0,
+                        action: () => {
+                            const popLoss = Math.min(state.pop, 5);
+                            state.pop -= popLoss;
+                            state.happy = Math.max(10, state.happy - 15);
+                            return `ไฟลุกลามทำให้บ้านเรือนเสียหาย! สูญเสียประชากร ${popLoss} คน และความสุขลดลง 15%`;
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'plague',
+                icon: '🦠',
+                title: 'โรคระบาดตามฤดูกาล!',
+                desc: 'เชื้อโรคแพร่ระบาดอย่างรวดเร็ว ประชาชนต้องการยารักษาและการดูแล',
+                choices: [
+                    {
+                        text: '🏥 ใช้โรงพยาบาลรักษาฟรี (มีโรงพยาบาลแล้ว)',
+                        requires: () => state.landTiles.some(t => getCompletedId(t) === 'hospital'),
+                        action: () => {
+                            state.happy = Math.min(100, state.happy + 5);
+                            return 'โรงพยาบาลของเมืองรักษาประชาชนได้ทันท่วงที! ความสุข +5%';
+                        }
+                    },
+                    {
+                        text: '💰 จัดซื้อเวชภัณฑ์เร่งด่วน (-200 💰)',
+                        cost: 200,
+                        action: () => {
+                            state.gold -= 200;
+                            return 'แจกจ่ายยาและวัคซีนได้สำเร็จ ควบคุมโรคได้ทัน! (-200 💰)';
+                        }
+                    },
+                    {
+                        text: '❌ ไม่จ่ายเงิน (ปล่อยให้โรคสงบเอง)',
+                        cost: 0,
+                        action: () => {
+                            const popLoss = Math.min(state.pop, 6);
+                            state.pop -= popLoss;
+                            state.happy = Math.max(10, state.happy - 20);
+                            return `โรคระบาดรุนแรง! สูญเสียประชากร ${popLoss} คน และความสุขลดลง 20%`;
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'pirates',
+                icon: '🏴‍☠️',
+                title: 'โจรสลัดทะเลดักปล้นเรือสินค้า!',
+                desc: 'กองโจรสลัดล้อมเส้นทางขนส่งสินค้าทางทะเล เรียกเก็บค่าผ่านทาง',
+                choices: [
+                    {
+                        text: '💰 ยอมจ่ายค่าคุ้มครองเรือ (-180 💰)',
+                        cost: 180,
+                        action: () => {
+                            state.gold -= 180;
+                            return 'จ่ายค่าคุ้มครอง เส้นทางเดินเรือปลอดภัย สินค้าไม่สูญหาย (-180 💰)';
+                        }
+                    },
+                    {
+                        text: '❌ ปฏิเสธการจ่ายเงิน (เสี่ยงเดินเรือ)',
+                        cost: 0,
+                        action: () => {
+                            const foodLoss = Math.min(state.food, 25);
+                            state.food -= foodLoss;
+                            state.happy = Math.max(10, state.happy - 10);
+                            return `เรือสินค้าถูกดักปล้น! สูญเสียอาหาร ${foodLoss} 🌾 และความสุขลดลง 10%`;
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'blackout',
+                icon: '⚡',
+                title: 'ระบบส่งไฟฟ้าขัดข้อง!',
+                desc: 'หม้อแปลงไฟฟ้าหลักระเบิด หากไม่ซ่อม เมืองจะไม่มีไฟฟ้าใช้',
+                choices: [
+                    {
+                        text: '💰 จ้างช่างซ่อมบำรุงด่วน (-200 💰)',
+                        cost: 200,
+                        action: () => {
+                            state.gold -= 200;
+                            state.power = Math.min(100, state.power + 15);
+                            return 'ซ่อมแซมระบบไฟฟ้าเสร็จสมบูรณ์ เมืองกลับมาสว่างไสว! (-200 💰)';
+                        }
+                    },
+                    {
+                        text: '❌ ไม่จ่ายเงินซ่อม (ปล่อยไฟตก)',
+                        cost: 0,
+                        action: () => {
+                            state.power = Math.max(10, state.power - 35);
+                            state.happy = Math.max(10, state.happy - 15);
+                            return 'ไฟฟ้าดับเป็นบริเวณกว้าง! ระดับไฟฟ้าลดลง 35% และความสุขลดลง 15%';
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'festival',
+                icon: '🎉',
+                title: 'ข้อเสนอจัดเทศกาลเมือง!',
+                desc: 'ประชาชนเรียกร้องให้จัดงานรื่นเริงประจำปีเพื่อกระตุ้นจิตใจผู้คน',
+                choices: [
+                    {
+                        text: '💰 สนับสนุนงบจัดงานเต็มที่ (-250 💰)',
+                        cost: 250,
+                        action: () => {
+                            state.gold -= 250;
+                            state.pop += 8;
+                            state.happy = Math.min(100, state.happy + 20);
+                            return 'งานเทศกาลยิ่งใหญ่สำเร็จลุล่วง! ดึงดูดประชากรใหม่ +8 คน และความสุข +20%!';
+                        }
+                    },
+                    {
+                        text: '❌ ประหยัดงบ ไม่จัดงาน',
+                        cost: 0,
+                        action: () => {
+                            state.happy = Math.max(10, state.happy - 5);
+                            return 'งดจัดงาน ประชาชนผิดหวังเล็กน้อย ความสุขลดลง 5%';
+                        }
+                    }
+                ]
+            }
+        ];
+
+        // Streamlined Buildings List
+        const BUILDINGS = {
+            land: [
+                { id: 'house', name: 'บ้าน', icon: '🏠', cost: 150, turns: 1, desc: '+10 คน, -5 อาหาร', pop: 10, food: -5, gold: 0, power: -5, happy: 2 },
+                { id: 'farm', name: 'ฟาร์มเกษตร', icon: '🌾', cost: 120, turns: 1, desc: '+25 อาหาร', pop: 0, food: 25, gold: 0, power: -5, happy: 0 },
+                { id: 'school', name: 'โรงเรียน', icon: '🏫', cost: 220, turns: 2, desc: '+15% ศึกษา, +5% สุข', pop: 0, food: 0, gold: -10, power: -5, happy: 5 },
+                { id: 'busTerminal', name: 'สถานีขนส่ง', icon: '🚌', cost: 250, turns: 2, desc: '+10% สุข, บัสทำเงิน +50%', pop: 0, food: 0, gold: 10, power: -5, happy: 10 },
+                { id: 'market', name: 'ตลาดการค้า', icon: '🏪', cost: 200, turns: 2, desc: '+50 เงิน/รอบ', pop: 0, food: 0, gold: 50, power: -10, happy: 5 },
+                { id: 'power', name: 'โรงผลิตไฟ', icon: '⚡', cost: 300, turns: 3, desc: '+50% ไฟฟ้า', pop: 0, food: 0, gold: -10, power: 50, happy: -2 },
+                { id: 'hospital', name: 'โรงพยาบาล', icon: '🏥', cost: 350, turns: 3, desc: '+10% สุข, ป้องกันป่วย', pop: 0, food: 0, gold: -15, power: -10, happy: 10 },
+                { id: 'airport', name: 'สนามบิน', icon: '✈️', cost: 600, turns: 4, desc: '+120 💰/รอบ, ค้าขายต่างแดน', pop: 0, food: 0, gold: 120, power: -15, happy: 5 },
+                { id: 'park', name: 'สวนสาธารณะ', icon: '🌳', cost: 100, turns: 1, desc: '+15% ความสุข', pop: 0, food: 0, gold: -5, power: 0, happy: 15 }
+            ],
+            sea: [
+                { id: 'port', name: 'ท่าเรือประมง', icon: '⚓', cost: 200, turns: 2, desc: '+30 อาหาร, +20 เงิน', pop: 0, food: 30, gold: 20, power: 0, happy: 2 },
+                { id: 'rig', name: 'แท่นขุดเจาะ', icon: '🛢️', cost: 500, turns: 3, desc: '+100 เงิน/รอบ', pop: 0, food: 0, gold: 100, power: -15, happy: -5 },
+                { id: 'resort', name: 'รีสอร์ททะเล', icon: '🏝️', cost: 350, turns: 2, desc: '+20% สุข, +30 เงิน', pop: 0, food: -5, gold: 30, power: -10, happy: 20 }
+            ]
+        };
+
+        // Tile Helpers
+        function getTileId(tile) {
+            if (!tile) return null;
+            return typeof tile === 'object' ? tile.id : tile;
+        }
+
+        function isTileConstructing(tile) {
+            return !!(tile && typeof tile === 'object' && tile.turnsLeft > 0);
+        }
+
+        function getCompletedId(tile) {
+            if (!tile) return null;
+            if (typeof tile === 'object') {
+                return tile.turnsLeft === 0 ? tile.id : null;
+            }
+            return tile;
+        }
+
+        const SAVE_KEY = 'simple_city_save';
+
+        // Sound Synthesis (Clean Web Audio)
+        let audioCtx = null;
+        function playTone(freq, type = 'sine', duration = 0.15) {
+            if (!state.sfx) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function speak(text) {
+            const el = document.getElementById('sr-announcer');
+            if (el) el.innerText = text;
+            if (!state.tts || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'th-TH';
+            window.speechSynthesis.speak(u);
+        }
+
+        // Zone Switching
+        function switchZone(zone) {
+            state.zone = zone;
+            const landBtn = document.getElementById('tab-land');
+            const seaBtn = document.getElementById('tab-sea');
+            if (zone === 'land') {
+                landBtn.className = "px-3.5 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+                seaBtn.className = "px-3.5 py-1.5 bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+                state.selectedBuilding = 'house';
+            } else {
+                seaBtn.className = "px-3.5 py-1.5 bg-cyan-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+                landBtn.className = "px-3.5 py-1.5 bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+                state.selectedBuilding = 'port';
+            }
+            renderBuildingMenu();
+            renderGrid();
+        }
+
+        // Render Building Selector
+        function renderBuildingMenu() {
+            const list = document.getElementById('building-list');
+            list.innerHTML = '';
+
+            // Demolish Tool Option
+            const isDemolish = state.selectedBuilding === 'demolish';
+            const demolishCard = document.createElement('button');
+            demolishCard.className = `p-2.5 rounded-xl border text-left transition flex items-center justify-between gap-2 ${
+                isDemolish 
+                    ? 'bg-rose-500/20 border-rose-500 ring-2 ring-rose-400' 
+                    : 'bg-slate-900/60 border-slate-700 hover:border-rose-400/60'
+            }`;
+            demolishCard.onclick = () => {
+                state.selectedBuilding = 'demolish';
+                playTone(280, 'sawtooth', 0.1);
+                renderBuildingMenu();
+                renderGrid();
+                showNotice('โหมดรื้อถอน: คลิกช่องสิ่งก่อสร้างที่ต้องการทำลาย (ได้เงินคืน 50%)');
+                speak('เปิดโหมดรื้อถอน คลิกอาคารเพื่อทำลาย');
+            };
+            demolishCard.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔨</span>
+                    <div>
+                        <div class="text-xs font-bold text-rose-300">รื้อถอน / ทำลายอาคาร</div>
+                        <div class="text-[10px] text-slate-400">คลิกเพื่อทุบทิ้ง • ได้เงินคืน 50%</div>
+                    </div>
+                </div>
+                <div class="text-[11px] font-bold text-rose-400 shrink-0">
+                    ได้เงินคืน 💰
+                </div>
+            `;
+            list.appendChild(demolishCard);
+
+            const items = BUILDINGS[state.zone];
+            items.forEach(b => {
+                const isSelected = state.selectedBuilding === b.id;
+                const card = document.createElement('button');
+                card.className = `p-2.5 rounded-xl border text-left transition flex items-center justify-between gap-2 ${
+                    isSelected ? 'bg-amber-500/20 border-amber-500 ring-2 ring-amber-400' : 'bg-slate-900/60 border-slate-700 hover:border-slate-600'
+                }`;
+                card.onclick = () => {
+                    state.selectedBuilding = b.id;
+                    playTone(400, 'triangle', 0.08);
+                    renderBuildingMenu();
+                    renderGrid();
+                };
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">${b.icon}</span>
+                        <div>
+                            <div class="text-xs font-bold text-slate-200">${b.name}</div>
+                            <div class="text-[10px] text-slate-400">${b.desc} • <span class="text-amber-300 font-bold">⏱️ ${b.turns} วัน</span></div>
+                        </div>
+                    </div>
+                    <div class="text-xs font-bold text-amber-400 shrink-0">
+                        ${b.cost} 💰
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        // Render Grid
+        function renderGrid() {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = '';
+            const tiles = state.zone === 'land' ? state.landTiles : state.seaTiles;
+            const items = BUILDINGS[state.zone];
+            const isDemolish = state.selectedBuilding === 'demolish';
+
+            tiles.forEach((tile, index) => {
+                const bId = getTileId(tile);
+                const isUnderCon = isTileConstructing(tile);
+                const turnsLeft = isUnderCon ? tile.turnsLeft : 0;
+                const info = bId ? items.find(b => b.id === bId) : null;
+
+                const cell = document.createElement('button');
+                cell.className = `aspect-square rounded-xl border flex flex-col items-center justify-center transition p-1 relative ${
+                    tile 
+                        ? (isDemolish 
+                            ? 'bg-rose-950/40 border-rose-500/80 hover:border-rose-400 hover:scale-95' 
+                            : (isUnderCon ? 'bg-amber-950/30 border-amber-500/70 hover:border-amber-400 ring-1 ring-amber-500/30' : 'bg-slate-800 border-slate-600 hover:border-amber-400'))
+                        : (isDemolish 
+                            ? 'bg-slate-950/40 border-slate-800/60 opacity-40 cursor-not-allowed' 
+                            : 'bg-slate-950/50 border-slate-800 hover:border-slate-700')
+                }`;
+                
+                if (tile) {
+                    if (isUnderCon) {
+                        cell.innerHTML = `
+                            <span class="text-xl animate-pulse">🏗️</span>
+                            <span class="text-[9px] text-amber-300 font-bold mt-0.5 truncate w-full text-center">${info ? info.name : ''}</span>
+                            <span class="text-[8px] px-1 bg-amber-900/80 text-amber-200 rounded font-semibold mt-0.5">รอ ${turnsLeft} วัน</span>
+                            ${isDemolish ? '<span class="absolute top-1 right-1 text-xs">🔨</span>' : ''}
+                        `;
+                        cell.title = isDemolish 
+                            ? `ยกเลิกการก่อสร้าง ${info ? info.name : ''} (ช่องที่ ${index + 1})`
+                            : `กำลังสร้าง ${info ? info.name : ''} (เหลืออีก ${turnsLeft} วัน)`;
+                    } else {
+                        cell.innerHTML = `
+                            <span class="text-2xl">${info ? info.icon : '🏢'}</span>
+                            <span class="text-[10px] ${isDemolish ? 'text-rose-300' : 'text-slate-300'} font-bold mt-1 truncate w-full text-center">${info ? info.name : ''}</span>
+                            ${isDemolish ? '<span class="absolute top-1 right-1 text-xs">🔨</span>' : ''}
+                        `;
+                        cell.title = isDemolish 
+                            ? `คลิกเพื่อทำลาย ${info ? info.name : ''} (ช่องที่ ${index + 1})`
+                            : `${info ? info.name : ''} (ช่องที่ ${index + 1})`;
+                    }
+                } else {
+                    cell.innerHTML = `<span class="text-slate-600 text-sm font-semibold">+</span>`;
+                    cell.title = isDemolish ? `ช่องว่าง` : `ช่องว่างที่ ${index + 1} (คลิกเพื่อสร้าง)`;
+                }
+
+                cell.onclick = () => placeBuilding(index);
+                container.appendChild(cell);
+            });
+        }
+
+        // Demolish Action
+        function demolishTile(index) {
+            const tiles = state.zone === 'land' ? state.landTiles : state.seaTiles;
+            const items = BUILDINGS[state.zone];
+            const tile = tiles[index];
+            if (!tile) return;
+
+            const bId = getTileId(tile);
+            const isCompleted = !isTileConstructing(tile);
+            const b = items.find(item => item.id === bId);
+            const refund = b ? Math.round(b.cost * 0.5) : 0;
+
+            // Refund coins
+            state.gold += refund;
+            // Only revert pop and happiness if it was already completed
+            if (b && isCompleted) {
+                state.pop = Math.max(0, state.pop - b.pop);
+                state.happy = Math.max(0, Math.min(100, state.happy - b.happy));
+            }
+            tiles[index] = null;
+
+            // Recalculate education
+            const schoolCount = state.landTiles.filter(t => getCompletedId(t) === 'school').length;
+            state.education = Math.min(100, 50 + (schoolCount * 15));
+
+            // Sound effect (demolish crunch)
+            playTone(220, 'sawtooth', 0.12);
+            setTimeout(() => playTone(130, 'sawtooth', 0.18), 50);
+
+            const bName = b ? b.name : 'สิ่งก่อสร้าง';
+            showNotice(`💥 รื้อถอน ${bName} แล้ว! ได้รับเงินคืน ${refund} 💰`);
+            speak(`รื้อถอน ${bName} ได้เงินคืน ${refund}`);
+            updateUI();
+            renderGrid();
+        }
+
+        // Build Action
+        function placeBuilding(index) {
+            const tiles = state.zone === 'land' ? state.landTiles : state.seaTiles;
+            const items = BUILDINGS[state.zone];
+
+            // If Demolish tool is selected
+            if (state.selectedBuilding === 'demolish') {
+                if (!tiles[index]) {
+                    showNotice('ช่องนี้ว่างเปล่า ไม่มีสิ่งก่อสร้างให้ทำลาย');
+                    speak('ช่องนี้ว่างเปล่า');
+                    return;
+                }
+                demolishTile(index);
+                return;
+            }
+
+            const b = items.find(item => item.id === state.selectedBuilding);
+            if (!b) return;
+
+            // Tile already occupied -> offer instant demolish
+            if (tiles[index]) {
+                const bId = getTileId(tiles[index]);
+                const existing = items.find(item => item.id === bId);
+                const isUnderCon = isTileConstructing(tiles[index]);
+                const refund = existing ? Math.round(existing.cost * 0.5) : 0;
+                playTone(200, 'sawtooth', 0.2);
+                showNoticeWithAction(
+                    `ช่องนี้มี ${existing ? existing.name : 'อาคาร'} ${isUnderCon ? '(กำลังก่อสร้าง)' : ''} อยู่แล้ว`,
+                    `🔨 ยกเลิก/ทุบทิ้ง (คืน ${refund} 💰)`,
+                    () => demolishTile(index)
+                );
+                speak(`ช่องนี้มี ${existing ? existing.name : 'อาคาร'} แล้ว`);
+                return;
+            }
+
+            if (state.gold < b.cost) {
+                playTone(180, 'sawtooth', 0.2);
+                showNotice('เงินไม่พอสร้าง ' + b.name);
+                speak('เงินไม่พอสร้าง ' + b.name);
+                return;
+            }
+
+            // Pay cost and start construction timer
+            state.gold -= b.cost;
+            tiles[index] = {
+                id: b.id,
+                turnsLeft: b.turns,
+                totalTurns: b.turns
+            };
+
+            playTone(523, 'triangle', 0.15);
+            showNotice(`🔨 เริ่มก่อสร้าง ${b.name} (ใช้เวลา ${b.turns} วัน กด Spacebar เพื่อข้ามวัน)`);
+            speak(`เริ่มสร้าง ${b.name} รอ ${b.turns} วัน`);
+            updateUI();
+            renderGrid();
+        }
+
+        // Turn Cycle
+        function nextTurn() {
+            if (state.activeEvent) {
+                showNotice('⚠️ โปรดตัดสินใจเลือกการแก้ปัญหาในเหตุการณ์ก่อนข้ามวัน!');
+                speak('กรุณาตัดสินใจเลือกการแก้ปัญหาก่อน');
+                openEventModal();
+                return;
+            }
+
+            state.turn++;
+            
+            // 1. Advance construction timers
+            let completedBuildings = [];
+            [state.landTiles, state.seaTiles].forEach((grid, zIdx) => {
+                const list = zIdx === 0 ? BUILDINGS.land : BUILDINGS.sea;
+                grid.forEach(tile => {
+                    if (tile && typeof tile === 'object' && tile.turnsLeft > 0) {
+                        tile.turnsLeft--;
+                        if (tile.turnsLeft === 0) {
+                            const b = list.find(item => item.id === tile.id);
+                            if (b) {
+                                completedBuildings.push(b.name);
+                                state.pop += b.pop;
+                                state.happy = Math.max(0, Math.min(100, state.happy + b.happy));
+                            }
+                        }
+                    }
+                });
+            });
+
+            if (completedBuildings.length > 0) {
+                playTone(659, 'triangle', 0.2);
+                setTimeout(() => playTone(880, 'triangle', 0.25), 90);
+                showNotice(`🎉 ก่อสร้างเสร็จสมบูรณ์แล้ว: ${completedBuildings.join(', ')}`);
+                speak(`สร้าง ${completedBuildings.join(', ')} เสร็จแล้ว`);
+            }
+
+            let goldChange = 20; // Base tax
+            let foodChange = 0;
+            let powerProvided = 50;
+            let powerNeeded = Math.round(state.pop * 0.8);
+            let happyChange = 0;
+
+            // Calculate education from completed schools
+            const schoolCount = state.landTiles.filter(t => getCompletedId(t) === 'school').length;
+            state.education = Math.min(100, 50 + (schoolCount * 15));
+            // Education boosts productivity/economy
+            const eduBonus = Math.round(state.education / 5);
+            goldChange += eduBonus;
+
+            // Transportation fleet bonus
+            const hasTerminal = state.landTiles.some(t => getCompletedId(t) === 'busTerminal');
+            const busMult = hasTerminal ? 1.5 : 1.0;
+            const busGold = Math.round(state.vehicles.bus.count * state.vehicles.bus.income * busMult);
+            const busHappy = state.vehicles.bus.count * state.vehicles.bus.happy;
+            const truckGold = state.vehicles.truck.count * state.vehicles.truck.income;
+            const shipGold = state.vehicles.ship.count * state.vehicles.ship.income;
+            const shipFood = state.vehicles.ship.count * (state.vehicles.ship.food || 0);
+
+            goldChange += (busGold + truckGold + shipGold);
+            foodChange += shipFood;
+            happyChange += busHappy;
+
+            // Only completed buildings produce resources
+            const allTiles = [
+                ...state.landTiles.map(t => ({ id: getCompletedId(t), list: BUILDINGS.land })),
+                ...state.seaTiles.map(t => ({ id: getCompletedId(t), list: BUILDINGS.sea }))
+            ];
+
+            allTiles.forEach(({ id, list }) => {
+                if (!id) return;
+                const b = list.find(item => item.id === id);
+                if (b) {
+                    goldChange += b.gold;
+                    foodChange += b.food;
+                    if (b.power > 0) powerProvided += b.power;
+                    else powerNeeded += Math.abs(b.power);
+                }
+            });
+
+            // Food consumption by population
+            const foodEaten = Math.round(state.pop * 0.5);
+            state.food = Math.max(0, state.food + foodChange - foodEaten);
+
+            // Power calculation
+            state.power = Math.min(100, Math.round((powerProvided / Math.max(1, powerNeeded)) * 100));
+
+            // Happiness logic
+            if (state.food <= 0) happyChange -= 15;
+            if (state.power < 60) happyChange -= 10;
+            if (state.food > 30 && state.power >= 80) happyChange += 3;
+
+            state.gold = Math.max(0, state.gold + goldChange);
+            state.happy = Math.max(10, Math.min(100, state.happy + happyChange));
+
+            playTone(440, 'sine', 0.1);
+            updateUI();
+            renderGrid();
+            if (completedBuildings.length === 0) {
+                speak(`วันที่ ${state.turn}`);
+            }
+
+            // Trigger random event (turn 3 onwards, 28% chance if no active event)
+            if (state.turn >= 3 && Math.random() < 0.28 && !state.activeEvent) {
+                setTimeout(() => {
+                    triggerRandomEvent();
+                }, 400);
+            }
+        }
+
+        // Interactive Event Controls
+        function triggerRandomEvent() {
+            const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+            state.activeEvent = ev;
+            openEventModal();
+            playTone(300, 'sawtooth', 0.2);
+            setTimeout(() => playTone(220, 'sawtooth', 0.25), 120);
+            speak(`เกิดเหตุการณ์: ${ev.title}`);
+        }
+
+        function openEventModal() {
+            if (!state.activeEvent) return;
+            const ev = state.activeEvent;
+            const modal = document.getElementById('event-modal');
+            document.getElementById('event-icon').innerText = ev.icon;
+            document.getElementById('event-title').innerText = ev.title;
+            document.getElementById('event-desc').innerText = ev.desc;
+
+            const container = document.getElementById('event-choices');
+            container.innerHTML = '';
+
+            ev.choices.forEach((choice) => {
+                const btn = document.createElement('button');
+                
+                let canChoose = true;
+                let disabledReason = '';
+                if (choice.requires && !choice.requires()) {
+                    canChoose = false;
+                    disabledReason = ' (ขาดอาคารที่ต้องใช้)';
+                } else if (choice.cost && state.gold < choice.cost) {
+                    canChoose = false;
+                    disabledReason = ` (เงินไม่พอ ขาดอีก ${(choice.cost - state.gold).toLocaleString()} 💰)`;
+                }
+
+                btn.className = `p-3 rounded-xl border text-left font-bold text-xs transition flex flex-col gap-0.5 ${
+                    canChoose
+                        ? 'bg-slate-800 hover:bg-slate-700 border-slate-600 hover:border-amber-400 text-slate-100 shadow cursor-pointer'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                }`;
+
+                btn.disabled = !canChoose;
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span>${choice.text}</span>
+                        ${disabledReason ? `<span class="text-[10px] text-rose-400 font-normal">${disabledReason}</span>` : ''}
+                    </div>
+                `;
+
+                if (canChoose) {
+                    btn.onclick = () => resolveEvent(choice);
+                }
+                container.appendChild(btn);
+            });
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function resolveEvent(choice) {
+            const resultMsg = choice.action();
+            state.activeEvent = null;
+            const modal = document.getElementById('event-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+
+            playTone(550, 'triangle', 0.2);
+            showNotice(resultMsg);
+            speak(resultMsg);
+            updateUI();
+            renderGrid();
+        }
+
+        // UI Updates
+        function updateUI() {
+            document.getElementById('val-gold').innerText = state.gold.toLocaleString();
+            document.getElementById('val-pop').innerText = state.pop;
+            document.getElementById('val-edu').innerText = state.education + '%';
+            document.getElementById('val-food').innerText = state.food;
+            document.getElementById('val-power').innerText = state.power + '%';
+            document.getElementById('val-happy').innerText = state.happy + '%';
+            document.getElementById('turn-text').innerText = 'รอบที่: ' + state.turn + ' (วันที่ ' + state.turn + ')';
+
+            const totalVehicles = Object.values(state.vehicles).reduce((sum, v) => sum + (v.count || 0), 0);
+            const badge = document.getElementById('transport-badge');
+            if (badge) badge.innerText = totalVehicles;
+
+            const modal = document.getElementById('transport-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                renderTransportModal();
+            }
+        }
+
+        // Transportation Modal Controls
+        function openTransportModal() {
+            const modal = document.getElementById('transport-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            renderTransportModal();
+            playTone(450, 'triangle', 0.1);
+            speak('เปิดระบบยานพาหนะขนส่ง');
+        }
+
+        function closeTransportModal() {
+            const modal = document.getElementById('transport-modal');
+            if (modal) {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        function renderTransportModal() {
+            const container = document.getElementById('transport-vehicle-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            Object.keys(state.vehicles).forEach(k => {
+                const v = state.vehicles[k];
+                const card = document.createElement('div');
+                card.className = 'bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-3';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">${v.icon}</span>
+                        <div>
+                            <div class="text-xs font-bold text-slate-200">
+                                ${v.name} <span class="text-indigo-400 font-semibold">(มี ${v.count} คัน)</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">${v.desc}</div>
+                            <div class="text-[11px] font-bold text-amber-400 mt-0.5">ราคา: ${v.cost} 💰</div>
+                        </div>
+                    </div>
+                    <button onclick="buyVehicle('${k}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition shadow flex items-center gap-1 shrink-0">
+                        🛒 ซื้อเพิ่ม
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function buyVehicle(key) {
+            const v = state.vehicles[key];
+            if (!v) return;
+
+            if (state.gold < v.cost) {
+                playTone(180, 'sawtooth', 0.2);
+                showNotice(`เงินไม่พอซื้อ ${v.name}`);
+                speak(`เงินไม่พอซื้อ ${v.name}`);
+                return;
+            }
+
+            state.gold -= v.cost;
+            v.count++;
+            playTone(587, 'triangle', 0.15);
+            setTimeout(() => playTone(784, 'triangle', 0.2), 80);
+
+            showNotice(`ซื้อ ${v.name} สำเร็จ! (มีทั้งหมด ${v.count} คัน)`);
+            speak(`ซื้อ ${v.name} สำเร็จ`);
+            updateUI();
+        }
+
+        function showNotice(msg) {
+            const box = document.getElementById('notice-box');
+            document.getElementById('notice-text').innerText = msg;
+            const actionBtn = document.getElementById('notice-action-btn');
+            if (actionBtn) actionBtn.classList.add('hidden');
+            box.classList.remove('hidden');
+        }
+
+        function showNoticeWithAction(msg, actionLabel, actionCallback) {
+            const box = document.getElementById('notice-box');
+            document.getElementById('notice-text').innerText = msg;
+            const actionBtn = document.getElementById('notice-action-btn');
+            if (actionBtn) {
+                actionBtn.innerText = actionLabel;
+                actionBtn.onclick = () => {
+                    actionCallback();
+                    dismissNotice();
+                };
+                actionBtn.classList.remove('hidden');
+            }
+            box.classList.remove('hidden');
+        }
+
+        function dismissNotice() {
+            document.getElementById('notice-box').classList.add('hidden');
+        }
+
+        // Audio & Accessibility Toggles
+        function toggleSFX() {
+            state.sfx = !state.sfx;
+            document.getElementById('sfx-btn').innerText = state.sfx ? '🔊 เสียง: เปิด' : '🔇 เสียง: ปิด';
+            if (state.sfx) playTone(500, 'sine', 0.1);
+        }
+
+        function toggleTTS() {
+            state.tts = !state.tts;
+            document.getElementById('tts-btn').innerText = state.tts ? '🗣️ บรรยาย: เปิด' : '🗣️ บรรยาย: ปิด';
+            speak(state.tts ? 'เปิดเสียงบรรยายแล้ว' : 'ปิดเสียงบรรยายแล้ว');
+        }
+
+        function toggleContrast() {
+            state.contrast = !state.contrast;
+            document.body.classList.toggle('contrast', state.contrast);
+            speak(state.contrast ? 'เปิดโหมดคอนทราสต์' : 'ปิดโหมดคอนทราสต์');
+        }
+
+        function readStatus() {
+            const totalVehicles = Object.values(state.vehicles).reduce((sum, v) => sum + (v.count || 0), 0);
+            const summary = `รอบที่ ${state.turn}, เงิน ${state.gold}, ประชากร ${state.pop} คน, การศึกษา ${state.education} เปอร์เซ็นต์, อาหาร ${state.food}, ไฟฟ้า ${state.power} เปอร์เซ็นต์, ความสุข ${state.happy} เปอร์เซ็นต์, มียานพาหนะขนส่งรวม ${totalVehicles} คัน`;
+            showNotice(summary);
+            speak(summary);
+        }
+
+        // Save & Load
+        function saveGame() {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+                playTone(600, 'sine', 0.2);
+                showNotice('บันทึกเกมสำเร็จ!');
+                speak('บันทึกเกมเรียบร้อยแล้ว');
+            } catch (e) {
+                showNotice('ไม่สามารถบันทึกเกมได้');
+            }
+        }
+
+        function loadGame() {
+            try {
+                const data = localStorage.getItem(SAVE_KEY);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    parsed.activeEvent = null;
+                    Object.assign(state, parsed);
+                    // Ensure vehicles structure exists
+                    if (!state.vehicles) {
+                        state.vehicles = {
+                            bus: { name: 'รถบัสคนงาน', icon: '🚌', count: 1, cost: 200, income: 35, happy: 3, desc: '+35 💰/รอบ, +3% สุข' },
+                            truck: { name: 'รถบรรทุกสินค้า', icon: '🚚', count: 1, cost: 250, income: 45, happy: 0, desc: '+45 💰/รอบ' },
+                            ship: { name: 'เรือสินค้าพาณิชย์', icon: '🚢', count: 0, cost: 400, income: 75, food: 15, happy: 2, desc: '+75 💰/รอบ, +15 อาหาร' }
+                        };
+                    }
+                    updateUI();
+                    switchZone(state.zone);
+                    document.body.classList.toggle('contrast', state.contrast);
+                    showNotice('โหลดเกมสำเร็จ!');
+                    speak('โหลดเกมสำเร็จ');
+                } else {
+                    showNotice('ไม่พบไฟล์บันทึก');
+                }
+            } catch (e) {
+                showNotice('เกิดข้อผิดพลาดในการโหลด');
+            }
+        }
+
+        // Keyboard Controls
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                nextTurn();
+            } else if (e.code === 'KeyR') {
+                e.preventDefault();
+                readStatus();
+            }
         });
 
-        announce(I18N[currentLang].decreeRatifiedSpeech(choice.title[currentLang]));
-        updateUI();
-      }
-
-      function handleUpgrade(sector, nameKey) {
-        audio.tap();
-        const cost = getUpgradeCost(sector);
-        if (state.gold >= cost.gold && state.materials >= cost.mat) {
-          state.gold -= cost.gold;
-          state.materials -= cost.mat;
-          state.sectors[sector] += 1;
-          audio.upgrade();
-
-          const newLvl = state.sectors[sector];
-          const nameTh = I18N.th.upgradeNames[nameKey];
-          const nameEn = I18N.en.upgradeNames[nameKey];
-
-          state.chronicle.unshift({
-            th: `ปีที่ ${state.year}: พัฒนา${nameTh} สู่ระดับ ${newLvl}`,
-            en: `Year ${state.year}: Upgraded ${nameEn} to Level ${newLvl}`
-          });
-
-          announce(currentLang === 'th' ? `ยกระดับ${nameTh} เรียบร้อยแล้ว` : `Upgraded ${nameEn} successfully.`);
-          updateUI();
-        }
-      }
-
-      function concludeTurn() {
-        if (!state.resolved) return;
-        audio.advance();
-
-        state.gold += getNetGold();
-        state.materials += getMatProd();
-
-        const prod = getFoodProd();
-        const cons = getFoodCons();
-        state.food += prod;
-
-        let starvation = 0;
-        if (state.food < cons) {
-          const deficit = cons - state.food;
-          state.food = 0;
-          starvation = Math.min(state.population - 10, Math.max(4, Math.round(deficit * 0.7)));
-          state.population -= starvation;
-          state.happiness = Math.max(0, state.happiness - 20);
-          audio.danger();
-        } else {
-          state.food -= cons;
-          const housing = getHousing();
-          if (state.population < housing && state.happiness >= 50) {
-            const growth = Math.max(2, Math.round((housing - state.population) * 0.08));
-            state.population += growth;
-          }
-        }
-
-        // Apply Policy Morale
-        const rationImpact = RATION_POLICIES[state.policies.ration].happyDelta;
-        const taxImpact = TAX_POLICIES[state.policies.tax].happyDelta;
-        const festImpact = FESTIVAL_POLICIES[state.policies.fest].happyDelta;
-        state.happiness = Math.max(0, Math.min(100, state.happiness + rationImpact + taxImpact + festImpact));
-
-        // Victory Streak
-        if (state.happiness >= 85 && starvation === 0 && state.population >= 400) {
-          state.streak += 1;
-        } else {
-          state.streak = 0;
-        }
-
-        const summaryTh = `สิ้นสุดปีที่ ${state.year}: ${starvation ? I18N.th.starvedNotice(starvation) : I18N.th.popGrowthNotice} ความสุข ${state.happiness}%`;
-        const summaryEn = `Year ${state.year} ended: ${starvation ? I18N.en.starvedNotice(starvation) : I18N.en.popGrowthNotice} Approval ${state.happiness}%`;
-        state.chronicle.unshift({ th: summaryTh, en: summaryEn });
-
-        // End Game Checks
-        if (state.streak >= 4) { endGame(END_OUTCOMES.utopia); return; }
-        if (state.gold >= 10000) { endGame(END_OUTCOMES.hegemony); return; }
-        if (state.population >= 2000 && state.population <= getHousing()) { endGame(END_OUTCOMES.metropolis); return; }
-        if (state.happiness < 20) { endGame(END_OUTCOMES.revolution); return; }
-        if (state.gold < 0) { endGame(END_OUTCOMES.bankruptcy); return; }
-        if (state.population < 30) { endGame(END_OUTCOMES.collapse); return; }
-
-        state.year += 1;
-        pullDilemma();
-        updateUI();
-        announce(I18N[currentLang].yearBeganSpeech(state.year, currentLang === 'th' ? summaryTh : summaryEn), true);
-      }
-
-      function endGame(outcome) {
-        modalOverlay.removeAttribute('hidden');
-        modalHeading.textContent = outcome.title[currentLang];
-        modalDesc.textContent = outcome.desc[currentLang];
-        const box = document.getElementById('modal-box');
-        box.className = `modal-dialog ${outcome.victory ? 'victory' : 'defeat'}`;
-        if (outcome.victory) audio.victory(); else audio.danger();
-        announce(`${outcome.title[currentLang]}. ${outcome.desc[currentLang]}`, true);
-      }
-
-      function resetGame() {
-        state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-        modalOverlay.setAttribute('hidden', 'true');
-        pullDilemma();
-        updateUI();
-        announce(I18N[currentLang].newReignSpeech, true);
-      }
-
-      // Event Listeners
-      choiceABtn.addEventListener('click', () => resolveChoice('A'));
-      choiceBBtn.addEventListener('click', () => resolveChoice('B'));
-
-      btnRation.addEventListener('click', () => {
-        audio.tap();
-        state.policies.ration = (state.policies.ration + 1) % RATION_POLICIES.length;
-        updateUI();
-        announce(RATION_POLICIES[state.policies.ration].desc[currentLang]);
-      });
-
-      btnTax.addEventListener('click', () => {
-        audio.tap();
-        state.policies.tax = (state.policies.tax + 1) % TAX_POLICIES.length;
-        updateUI();
-        announce(TAX_POLICIES[state.policies.tax].desc[currentLang]);
-      });
-
-      btnFestival.addEventListener('click', () => {
-        audio.tap();
-        state.policies.fest = (state.policies.fest + 1) % FESTIVAL_POLICIES.length;
-        updateUI();
-        announce(FESTIVAL_POLICIES[state.policies.fest].desc[currentLang]);
-      });
-
-      btnUpgradeAgri.addEventListener('click', () => handleUpgrade('agri', 'agri'));
-      btnUpgradeComm.addEventListener('click', () => handleUpgrade('comm', 'comm'));
-      btnUpgradeCivic.addEventListener('click', () => handleUpgrade('civic', 'civic'));
-      btnUpgradeInd.addEventListener('click', () => handleUpgrade('ind', 'ind'));
-
-      btnConclude.addEventListener('click', concludeTurn);
-
-      // Language Switcher
-      langBtn.addEventListener('click', () => {
-        audio.tap();
-        currentLang = currentLang === 'th' ? 'en' : 'th';
-        updateUI();
-        announce(currentLang === 'th' ? 'เปลี่ยนภาษาเป็นภาษาไทยแล้ว' : 'Language switched to English');
-      });
-
-      soundBtn.addEventListener('click', () => {
-        audio.enabled = !audio.enabled;
-        audio.tap();
-        updateUI();
-      });
-
-      restartBtn.addEventListener('click', () => {
-        if (confirm(I18N[currentLang].restartConfirm)) resetGame();
-      });
-
-      btnModalRestart.addEventListener('click', resetGame);
-
-      ['touchstart', 'click'].forEach(evt => {
-        document.body.addEventListener(evt, () => audio.init(), { once: true, passive: true });
-      });
-
-      // Init Game
-      pullDilemma();
-      updateUI();
-      announce(I18N[currentLang].welcomeSpeech);
-    })();
-  </script>
+        // Init
+        window.onload = () => {
+            updateUI();
+            renderBuildingMenu();
+            renderGrid();
+        };
+    </script>
 </body>
 </html>
